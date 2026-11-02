@@ -212,6 +212,27 @@ test('import reports bad rows instead of failing silently', () => {
   const res = IO.parseAttempts('course,credits,semester,score\nA,3,Someday,70\nB,3,Jan2022,170\n,3,Jan2022,70');
   assert.strictEqual(res.rows.length, 0); assert.strictEqual(res.errors.length, 3);
 });
+test('profile files with a BOM (re-saved on Windows) still load', () => {
+  const p = profile({ attempts: [att('Jan2023', 'A', 4, 80)] });
+  const BOM = String.fromCharCode(0xFEFF);
+  assert.ok(IO.parseProfile(BOM + IO.toJSON(p)).attempts.length === 1);
+  assert.strictEqual(IO.parseAttempts(BOM + 'course,credits,term,score\nA,3,Jan2023,70').rows.length, 1);
+});
+test('first hand-off transcript format converts to a profile with the same CGPA and plan', () => {
+  const legacy = { curriculum: [{ level: 1, code: 'A', name: 'Alpha', credits: 4 }, { level: 1, code: 'B', name: 'Beta', credits: 2 }, { level: 2, code: 'BTU1', name: 'Req', credits: 2 }],
+    university_requirement_codes: ['BTU1'], non_degree_courses: ['X'],
+    attempts: [{ term: 'Jan2023', course: 'A', credits: 4, score: 80, absent: false }, { term: 'Jan2023', course: 'B', credits: 2, score: 40, absent: false },
+      { term: 'Jan2023', course: 'X', credits: 2, score: 90, absent: false }, { term: 'Jan2023', course: 'BTU1', credits: 2, score: 55, absent: false }],
+    official_snapshots: [{ term: 'Jan2023', cgpa: 2.5 }], fitted_config: { w_failed: 0.96, w_absent: 1, decay: 0.04, repeat_mode: 'weighted', exclude_non_degree: true } };
+  const p = Store.normalize(IO.parseProfile(JSON.stringify(legacy)));
+  near(G.totals(p).cgpa, (12 + 0 + 0.5 * 2) / (4 + 2 + 2), 1e-9);
+  assert.deepStrictEqual(p.plan.map(r => r.code), ['B']);
+  assert.strictEqual(p.snapshots.length, 1);
+});
+test('garbage files give a readable error', () => {
+  assert.throws(() => IO.parseProfile('not json'), /not valid JSON/);
+  assert.throws(() => IO.parseProfile('{"hello":1}'), /Not a GPA profile/);
+});
 test('profile survives a JSON round trip', () => {
   const p = profile({ attempts: [att('Jan2023', 'A', 4, 80)] });
   const q = Store.normalize(JSON.parse(IO.toJSON(p)));

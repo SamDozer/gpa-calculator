@@ -49,9 +49,11 @@
    * A blank score, "غ", "AB" or "absent" means the exam was missed.
    * defaults.credits (course -> credits) fills a missing credits column.
    */
+  function clean(text) { return String(text || '').replace(/^﻿/, '').trim(); }
+
   function parseAttempts(text, defaults) {
     defaults = defaults || {};
-    text = String(text || '').trim();
+    text = clean(text);
     var rows = [], errors = [];
     if (!text) return { rows: rows, errors: ['Nothing to import.'] };
     function push(term, course, credits, scoreRaw, absentFlag, line) {
@@ -103,13 +105,39 @@
   }
   function toJSON(p) { return JSON.stringify(p, null, 2); }
 
+  /** The first hand-off format (curriculum + attempts + fitted_config at the top level) -> v2 profile. */
+  function fromLegacyTranscript(o) {
+    var req = {}; (o.university_requirement_codes || []).forEach(function (c) { req[c] = true; });
+    var f = o.fitted_config || {}, d = GPA.DEFAULT_CONFIG;
+    var p = {
+      version: 2, meta: { name: (o.student && (o.student.name || o.student)) || '', program: '', university: '' }, mode: 'full',
+      config: Object.assign({}, d, {
+        maxGPA: f.max_gpa != null ? f.max_gpa : d.maxGPA, gpaOffset: f.gpa_offset != null ? f.gpa_offset : d.gpaOffset, gpaDivisor: f.gpa_divisor != null ? f.gpa_divisor : d.gpaDivisor,
+        subjectPass: f.subject_pass_score != null ? f.subject_pass_score : d.subjectPass, requirementPass: f.requirement_pass_score != null ? f.requirement_pass_score : d.requirementPass,
+        repeatMode: f.repeat_mode || d.repeatMode, wFailed: f.w_failed != null ? f.w_failed : d.wFailed, wAbsent: f.w_absent != null ? f.w_absent : d.wAbsent, decay: f.decay != null ? f.decay : d.decay,
+        excludeNonDegree: f.exclude_non_degree !== false
+      }),
+      degree: { totalCredits: (o.curriculum || []).reduce(function (s, c) { return s + c.credits; }, 0) || 146,
+        curriculum: (o.curriculum || []).map(function (c) { return { level: c.level, code: c.code, name: c.name, credits: c.credits, req: !!req[c.code] }; }), nonDegree: o.non_degree_courses || [] },
+      baseline: { enabled: false, cgpa: 0, gpaHours: 0, earnedHours: 0, asOf: '' }, carry: {},
+      attempts: (o.attempts || []).map(function (a) { return { term: a.term, course: a.course, credits: a.credits, score: a.absent ? null : a.score, absent: !!a.absent, placeholder: !!a.placeholder_score }; }),
+      plan: [], snapshots: (o.official_snapshots || []).map(function (s) { return { term: s.term, cgpa: s.cgpa }; }), ui: {}
+    };
+    var tot = GPA.totals(p);
+    p.plan = p.degree.curriculum.filter(function (c) { return !(tot.byCode[c.code] && tot.byCode[c.code].passed); })
+      .map(function (c) { return { code: c.code, name: c.name, credits: c.credits, term: '', expected: null, active: true, level: c.level }; });
+    return p;
+  }
+
   /** Validate and normalise an imported profile; throws on obvious problems. */
   function parseProfile(text) {
-    var o = JSON.parse(text);
-    if (Array.isArray(o)) throw new Error('This looks like a list of attempts, not a profile. Use “Add courses → paste” instead.');
+    var o;
+    try { o = JSON.parse(clean(text)); } catch (e) { throw new Error('This file is not valid JSON (' + e.message + '). Use the file downloaded from Data → Download my data.'); }
+    if (Array.isArray(o)) throw new Error('This looks like a list of attempts, not a profile. Use Courses → “Paste many courses” instead.');
+    if (o && o.attempts && o.curriculum && !o.degree) return fromLegacyTranscript(o);
     if (!o || typeof o !== 'object' || (!o.attempts && !o.baseline && !o.plan)) throw new Error('Not a GPA profile file.');
     return o;
   }
 
-  return { parseAttempts: parseAttempts, attemptsToCSV: attemptsToCSV, toJSON: toJSON, parseProfile: parseProfile };
+  return { parseAttempts: parseAttempts, fromLegacyTranscript: fromLegacyTranscript, attemptsToCSV: attemptsToCSV, toJSON: toJSON, parseProfile: parseProfile };
 });

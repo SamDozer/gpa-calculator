@@ -178,10 +178,11 @@ window.UI = (function () {
     setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
   }
   function pickFile(accept, cb) {
-    var i = document.createElement('input'); i.type = 'file'; i.accept = accept || '';
+    var i = document.createElement('input'); i.type = 'file'; i.accept = accept || ''; i.style.display = 'none';
+    document.body.appendChild(i);   // detached inputs can be garbage-collected before 'change' fires in some browsers
     i.onchange = function () {
-      var file = i.files[0]; if (!file) return;
-      var r = new FileReader(); r.onload = function () { cb(String(r.result), file); }; r.readAsText(file);
+      var file = i.files[0]; i.remove(); if (!file) return;
+      var r = new FileReader(); r.onload = function () { cb(String(r.result), file); }; r.onerror = function () { UI.toast('Could not read that file', 'err'); }; r.readAsText(file);
     };
     i.click();
   }
