@@ -2,7 +2,7 @@
 UI.Welcome = (function () {
   'use strict';
   var G = window.GPA, el = null, step = null;
-  var REPO_URL = '';   // set after publishing, e.g. 'https://github.com/<owner>/gpa-calculator'
+  var REPO_URL = 'https://github.com/SamDozer/gpa-calculator';
 
   function tplOptions(sel) {
     return window.GPA_TEMPLATES.map(function (t) { return '<option value="' + t.id + '"' + (t.id === sel ? ' selected' : '') + '>' + UI.esc(t.title) + '</option>'; }).join('');
