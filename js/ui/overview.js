@@ -7,6 +7,7 @@ UI.Overview = (function () {
   function mount(root) {
     el = root;
     el.innerHTML =
+      '<div class="card" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap"><div style="flex:1;min-width:240px"><h2 style="margin:0">Planning a semester?</h2><p class="note" style="margin:4px 0 0">Enter the courses you take and the scores you expect: see the semester GPA, your new CGPA, and what each course does to it.</p></div><button class="btn primary" data-act="go" data-to="plan">Open the semester calculator →</button></div>' +
       '<div class="card" id="ov_stepsCard"><h2>Get set up <button class="btn sm ghost" data-act="hideSteps" style="margin-left:auto">hide</button></h2><div class="steps" id="ov_steps" style="margin-top:8px"></div></div>' +
       '<div class="card"><h2><span class="n">STAT</span> At a glance</h2><div class="stats" id="ov_stats" style="margin-top:10px"></div></div>' +
       '<div class="grid2">' +

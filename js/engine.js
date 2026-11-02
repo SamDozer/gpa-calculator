@@ -40,6 +40,9 @@
     'أغسطس': 8, 'اغسطس': 8, 'سبتمبر': 9, 'أكتوبر': 10, 'اكتوبر': 10, 'نوفمبر': 11, 'ديسمبر': 12,
     'شتاء': 1, 'ربيع': 2, 'صيف': 6, 'خريف': 9
   };
+  // typed month -> [exam-period month, year shift]
+  var EXAM_ALIAS = { dec: [1, 1], december: [1, 1], jun: [5, 0], june: [5, 0], aug: [9, 0], august: [9, 0],
+    'ديسمبر': [1, 1], 'يونيو': [5, 0], 'أغسطس': [9, 0], 'اغسطس': [9, 0] };
   var MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
   /** "Sep2026", "Sep 2026", "2026 Sep", "Fall-2026", "مايو2026" -> 202609. 0 when unparseable. */
@@ -56,6 +59,9 @@
     }
     var mo = MONTHS[name];
     if (!mo) return 0;
+    // Exam periods: Dec and Jan are both Term 1 exams, late-May and Jun are Term 2 exams, Aug and Sep are summer exams.
+    var al = EXAM_ALIAS[name];
+    if (al) { mo = al[0]; yr += al[1]; }
     return yr * 100 + mo;
   }
   function termMonthNumber(name) { return MONTHS[String(name).toLowerCase()] || 0; }
@@ -63,6 +69,28 @@
     var yr = Math.floor(order / 100), mo = order % 100, best = null;
     (scheme || DEFAULT_CONFIG.terms).forEach(function (n) { if (termMonthNumber(n) === mo) best = n; });
     return (best || MONTH_NAMES[mo - 1] || '?') + yr;
+  }
+  /**
+   * What a term label means in the Egyptian faculty calendar (labels are exam periods):
+   *   Jan (Dec/Jan exams)  = Term 1, which starts in autumn
+   *   May (late May/Jun)   = Term 2, which starts in February
+   *   Sep (Aug/Sep exams)  = Summer exams
+   * Other term schemes get generic names. Returns null for an unparseable label.
+   */
+  var KIND = { 1: ['Term 1', 'first-term exams (Dec/Jan)'], 5: ['Term 2', 'second-term exams (late May/Jun); the term starts in Feb'], 9: ['Summer', 'summer exams (Aug/Sep)'] };
+  function termInfo(label, scheme) {
+    var o = termOrder(label); if (!o) return null;
+    var yr = Math.floor(o / 100), mo = o % 100, sch = (scheme && scheme.length ? scheme : DEFAULT_CONFIG.terms).map(termMonthNumber).filter(Boolean).sort(function (a, b) { return a - b; });
+    var cairo = sch.join() === '1,5,9', k = KIND[mo];
+    var kind, detail;
+    if (cairo && k) { kind = k[0]; detail = k[1]; }
+    else {
+      var pos = sch.slice().sort(function (a, b) { return (a >= 7 ? a - 12 : a) - (b >= 7 ? b - 12 : b); }), i = pos.indexOf(mo);   // academic year starts in autumn
+      kind = i >= 0 ? 'Term ' + (i + 1) : MONTH_NAMES[mo - 1]; detail = 'exam period';
+    }
+    var ay = cairo ? (mo >= 10 ? yr : yr - 1) : (mo >= 7 ? yr : yr - 1);
+    return { order: o, year: yr, month: mo, kind: kind, detail: detail, academicYear: ay + '/' + String(ay + 1).slice(2),
+      text: kind + ' · ' + ay + '/' + String(ay + 1).slice(2) };
   }
   /** Next term after `label` given the year's term scheme, e.g. Sep2026 -> Jan2027. */
   function nextTerm(label, scheme) {
@@ -288,7 +316,7 @@
    * Project the CGPA after every active plan course gets one more attempt.
    * o: {sn, sr}  default expected scores (new / retake)
    *    only        array of course codes to include (default all active)
-   *    uniform     one score for every included course
+   *    uniform     one score for every included course (or only those in uniformFor[])
    *    override    {code: score}
    *    failFirst   code that fails once, then passes at retakeScore (default: its own expected score)
    *    fill        add the unplanned remaining credits at score sn (default p.ui.fill !== false)
@@ -306,7 +334,8 @@
       var cur = tot.byCode[it.code], atts = cur ? cur.attempts : [], carryT = carryTypes(ctx.carry[it.code]);
       var before = atts.length ? courseTerms(it.code, cr, carryT, atts, ctx) : { n: 0, d: 0 };
       var retake = carryT.length + atts.length > 0;
-      var sc = o.uniform != null ? o.uniform : (o.override && o.override[it.code] != null ? o.override[it.code] : expectedScore(it, retake, sn, sr));
+      var useU = o.uniform != null && (!o.uniformFor || o.uniformFor.indexOf(it.code) >= 0);
+      var sc = useU ? o.uniform : (o.override && o.override[it.code] != null ? o.override[it.code] : expectedScore(it, retake, sn, sr));
       var fut = [{ score: sc, absent: false }];
       if (o.failFirst === it.code) fut = [{ score: 0, absent: false }, { score: o.retakeScore != null ? o.retakeScore : sc, absent: false }];
       var after = courseTerms(it.code, cr, carryT, atts.concat(fut), ctx);
@@ -598,7 +627,7 @@
 
   return {
     DEFAULT_CONFIG: DEFAULT_CONFIG, BAND: BAND, MONTH_NAMES: MONTH_NAMES,
-    termOrder: termOrder, nextTerm: nextTerm, termsAhead: termsAhead, termLabelFromOrder: termLabelFromOrder,
+    termOrder: termOrder, termInfo: termInfo, nextTerm: nextTerm, termsAhead: termsAhead, termLabelFromOrder: termLabelFromOrder,
     makeCtx: makeCtx, isReq: isReq, passMark: passMark, isPass: isPass, scoreToGPA: scoreToGPA, letter: letter,
     gpaToPct: gpaToPct, pctToGpa: pctToGpa, bavarian: bavarian, germanClass: germanClass,
     drag: drag, carryTypes: carryTypes, attemptTypes: attemptTypes, courseTerms: courseTerms,

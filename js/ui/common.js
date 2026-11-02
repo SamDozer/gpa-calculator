@@ -206,6 +206,9 @@ window.UI = (function () {
     (extra || []).forEach(add);
     return out.sort(function (a, b) { return G.termOrder(a) - G.termOrder(b); });
   }
+  /** "Jan2027 · Term 1" for menus; the long form goes in tooltips and headers. */
+  function termLabel(S, label) { var i = G.termInfo(label, S.config.terms); return i ? label + ' · ' + i.kind : label; }
+  function termTag(S, label) { var i = G.termInfo(label, S.config.terms); return i ? '<span class="tag info" title="' + esc(i.kind + ': ' + i.detail) + '">' + esc(i.text) + '</span>' : ''; }
   function germanText(x, S) {
     var g = G.bavarian(x, S.config.germanMax, S.config.germanMin);
     return g == null ? '–' : g.toFixed(2);
@@ -214,5 +217,5 @@ window.UI = (function () {
   return { $: $, $$: $$, esc: esc, f: f, signed: signed, num: num, badge: badge, colors: colors, alpha: alpha,
     loadTheme: loadTheme, toggleTheme: toggleTheme, keepFocus: keepFocus, paint: paint, text: text, wire: wire, syncFields: syncFields, field: field,
     select: select, chart: chart, destroyCharts: destroyCharts, axis: axis, lineOpts: lineOpts, toast: toast, dialog: dialog,
-    download: download, pickFile: pickFile, areaOf: areaOf, termOptions: termOptions, germanText: germanText };
+    download: download, pickFile: pickFile, areaOf: areaOf, termOptions: termOptions, germanText: germanText, termLabel: termLabel, termTag: termTag };
 })();

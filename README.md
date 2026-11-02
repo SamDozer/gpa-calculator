@@ -7,7 +7,8 @@ A free, private GPA calculator and semester planner for **credit-hour programmes
 ## What it does
 
 - **Knows your CGPA exactly**, including the part most calculators get wrong: how a *failed or missed* attempt keeps weighing on your CGPA even after you retake and pass the course (see [the grading model](docs/GRADING_MODEL.md)).
-- **Plans next semester.** Add the courses you are taking, set the score you expect in each, and see the term GPA and your cumulative CGPA after it.
+- **Plans next semester.** The Semester calculator (top of the Plan tab) takes the courses you are taking and the score you expect in each, and shows the semester GPA, your new CGPA, and what each course does to it.
+- **Speaks the faculty calendar.** Terms are named by exam period: Jan (or Dec) = Term 1, May (or Jun) = Term 2, Sep (or Aug) = summer exams, with the academic year shown (see Settings → Term calendar).
 - **Answers “what do I need?”** The target calculator tells you the average you need to reach a CGPA, warns when a target is impossible, and shows which courses are worth the most effort and which failures cost the most.
 - **Shows the risk.** A simulation turns “I expect 85%” into a likely range and the probability of hitting your target.
 - **Estimates the German grade** (modified Bavarian formula) for MSc applications.

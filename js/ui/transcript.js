@@ -10,7 +10,7 @@ UI.Transcript = (function () {
       '<div class="card"><h2><span class="n">ADD</span> Add a result</h2>' +
       '<p class="note" id="a_note">Type a course you sat. Leave the score empty (or tick Absent) for a missed exam. Repeating a course applies the repeat penalty automatically.</p>' +
       '<div class="cfg">' +
-      '<label>Term<input type="text" id="a_term" list="dl_terms" placeholder="Sep2026" style="width:110px" autocomplete="off"></label>' +
+      '<label>Term (exam period)<input type="text" id="a_term" list="dl_terms" placeholder="Sep2026" style="width:110px" autocomplete="off" title="Jan = Term 1 exams (Dec/Jan), May = Term 2 exams (late May/Jun), Sep = Summer exams (Aug/Sep). Dec, Jun and Aug are accepted too."></label>' +
       '<label>Course code<input type="text" id="a_course" list="dl_courses" placeholder="BTC323" style="width:130px" autocomplete="off"></label>' +
       '<label>Credits<input type="number" id="a_cr" value="3" min="0.5" step="0.5" style="width:80px"></label>' +
       '<label>Score %<input type="number" id="a_score" min="0" max="100" placeholder="85" style="width:84px"></label>' +
@@ -152,7 +152,7 @@ UI.Transcript = (function () {
     /* datalists */
     var codes = {}; S.degree.curriculum.forEach(function (c) { codes[c.code] = c.name; }); S.plan.forEach(function (c) { codes[c.code] = codes[c.code] || c.name || ''; });
     UI.paint(UI.$('#dl_courses', el), Object.keys(codes).map(function (k) { return '<option value="' + UI.esc(k) + '">' + UI.esc(codes[k]) + '</option>'; }).join(''));
-    UI.paint(UI.$('#dl_terms', el), UI.termOptions(S).concat(G.termsAhead(S.attempts.length ? S.attempts[S.attempts.length - 1].term : 'Sep2026', 3, S.config.terms)).map(function (t) { return '<option value="' + t + '">'; }).join(''));
+    UI.paint(UI.$('#dl_terms', el), UI.termOptions(S).concat(G.termsAhead(S.attempts.length ? S.attempts[S.attempts.length - 1].term : 'Sep2026', 3, S.config.terms)).map(function (t) { return '<option value="' + UI.esc(t) + '">' + UI.esc(UI.termLabel(S, t)) + '</option>'; }).join(''));
     carryUI();
 
     /* attempts table */
@@ -170,7 +170,7 @@ UI.Transcript = (function () {
       if (r.o !== lastO) {
         lastO = r.o;
         var sg = semMap[r.o], cg = cumMap[r.o];
-        html += '<tr class="grp"><td colspan="6"><b>' + UI.esc(r.o ? a.term : 'Unknown term') + '</b>' +
+        html += '<tr class="grp"><td colspan="6"><b>' + UI.esc(r.o ? a.term : 'Unknown term') + '</b> ' + (r.o ? UI.termTag(S, a.term) : '') +
           (sg ? ' <span class="muted" style="font-weight:400"> · term GPA ' + UI.f(sg.gpa, 2) + (cg ? ' · CGPA after ' + UI.f(cg.cgpa) : '') + '</span>' : '') +
           (r.o ? ' <button class="btn sm ghost" data-act="prefill" data-code="" data-cr="3" data-term="' + UI.esc(a.term) + '">+ add here</button>' : ' <span class="tag bad">fix the term</span>') + '</td></tr>';
       }

@@ -30,6 +30,21 @@ UI.Plan = (function () {
   function mount(root) {
     el = root;
     el.innerHTML =
+      '<div class="card" id="calc_card"><h2><span class="n">SEM</span> Semester calculator: what will my GPA be?</h2>' +
+      '<p class="note">Pick the term, list the courses you take in it and the score you expect in each. You get that semester’s GPA, your new CGPA, and what each course does to it. Whatever you enter here is saved into your plan below, so nothing is entered twice.</p>' +
+      '<div class="cfg"><label>Term (named by its exam period)<select data-path="ui.calcTerm" data-type="str" id="calc_term" style="min-width:190px"></select></label><span class="msg" id="calc_info" style="align-self:center;max-width:46ch"></span></div>' +
+      '<div id="calc_result" style="margin:14px 0 6px"></div>' +
+      '<div class="tw" id="calc_tw"><table id="calc_tbl"><thead><tr><th>Course</th><th class="num">cr</th><th>score %</th><th>grade</th><th class="num">GPA pts</th><th class="num" title="CGPA change from adding only this course">effect on CGPA</th><th></th></tr></thead><tbody></tbody></table></div>' +
+      '<div class="cfg" style="margin-top:12px;padding-top:12px;border-top:1px dashed var(--line)">' +
+      '<label>Add a course<input type="text" id="sc_code" list="dl_pcodes" data-on="calcCode" placeholder="code, e.g. BTC323" style="width:150px" autocomplete="off"></label>' +
+      '<label>Credits<input type="number" id="sc_cr" value="3" min="0.5" step="0.5" style="width:78px"></label>' +
+      '<label>Type<select id="sc_type" data-on="calcType"><option value="new">new course</option><option value="ret">retake</option></select></label>' +
+      '<label id="sc_fw" hidden>Times failed before<input type="number" id="sc_f" min="0" value="1" style="width:92px"></label>' +
+      '<label>Expected %<input type="number" id="sc_exp" min="0" max="100" placeholder="default" style="width:86px"></label>' +
+      '<button class="btn primary" data-act="calcAdd" style="margin-bottom:2px">+ Add</button></div>' +
+      '<p class="msg" id="sc_msg" style="margin:8px 0 0"></p>' +
+      '<div class="slider" id="sc_allw" hidden><div class="slider-lab"><span>Set every course in this term to</span><span class="val green" id="sc_allv">85%</span></div><input type="range" min="50" max="100" value="85" data-on="calcAll" id="sc_all" aria-label="Set all scores for this term"></div>' +
+      '<p class="note" id="calc_note" style="margin:10px 0 0"></p></div>' +
       '<div class="card"><h2><span class="n">ADD</span> Add a course to your plan</h2>' +
       '<p class="note" id="pa_note">Planning this semester or the next? Add each course with the credits and the score you expect. For a course you failed or missed before, mark it as a retake so the repeat penalty is counted.</p>' +
       '<div class="cfg">' +
@@ -68,6 +83,14 @@ UI.Plan = (function () {
 
     UI.wire(el, {
       addPlan: addPlan,
+      calcAdd: calcAdd,
+      calcCode: function () { calcCodeChanged(); },
+      calcType: function (t) { UI.$('#sc_fw', el).hidden = t.value !== 'ret'; },
+      calcAll: function (t) {
+        var v = Math.round(+t.value), S = Store.get(), cur = calcTermOf(S);
+        UI.text(UI.$('#sc_allv', el), v + '%');
+        Store.update(function (S2) { S2.plan.forEach(function (r) { if (r.active !== false && String(r.term || '').trim() && G.termOrder(r.term) === G.termOrder(cur)) r.expected = v; }); S2.ui.touched = true; });
+      },
       auto: function () {
         Store.update(function (S) {
           var term = startTerm(S), used = 0, n = 0, max = +S.ui.maxCreditsPerTerm || 12;
@@ -109,7 +132,7 @@ UI.Plan = (function () {
     UI.$('#pa_code', el).addEventListener('input', codeChanged);
     UI.$('#pa_code', el).addEventListener('change', codeChanged);
     UI.$('#pa_type', el).addEventListener('change', function () { UI.$('#pa_ret', el).hidden = this.value !== 'ret' || !!UI.$('#pa_type', el).disabled; });
-    UI.$('#rem_tbl', el).addEventListener('input', function (e) { if (e.target.dataset.path && /\.expected$/.test(e.target.dataset.path)) S_touch(); });
+    ['#rem_tbl', '#calc_tbl'].forEach(function (id) { UI.$(id, el).addEventListener('input', function (e) { if (e.target.dataset.path && /\.expected$/.test(e.target.dataset.path)) S_touch(); }); });
   }
   function S_touch() { var S = Store.get(); if (!S.ui.touched) S.ui.touched = true; }
 
@@ -136,40 +159,123 @@ UI.Plan = (function () {
     if (hasAtt) { type.value = 'ret'; type.disabled = true; box.hidden = true; UI.text(UI.$('#pa_msg', el), code + ' has ' + hist.length + ' logged attempt(s): counted as a retake automatically.'); UI.$('#pa_msg', el).className = 'msg'; }
     else { type.disabled = false; box.hidden = type.value !== 'ret'; if (UI.$('#pa_msg', el).textContent.indexOf('logged attempt') >= 0) UI.text(UI.$('#pa_msg', el), ''); }
   }
-  function addPlan() {
-    var S = Store.get(), msg = UI.$('#pa_msg', el);
-    function bad(t) { msg.className = 'msg err'; msg.textContent = t; }
-    var code = canon(S, UI.$('#pa_code', el).value), name = UI.$('#pa_name', el).value.trim(), cr = parseFloat(UI.$('#pa_cr', el).value),
-      term = UI.$('#pa_term', el).value.trim(), expRaw = UI.$('#pa_exp', el).value.trim(), exp = expRaw === '' ? null : parseFloat(expRaw),
-      type = UI.$('#pa_type', el).value, hasAtt = S.attempts.some(function (a) { return a.course === code; });
-    if (!code) return bad('Enter a course code.');
-    if (!(cr > 0)) return bad('Credits must be a positive number.');
-    if (term && !G.termOrder(term)) return bad('Term not understood. Use e.g. Sep2026, or leave it empty.');
-    if (exp !== null && (isNaN(exp) || exp < 0 || exp > 100)) return bad('Expected score must be between 0 and 100.');
-    if (S.plan.some(function (r) { return r.code === code; })) return bad(code + ' is already in the plan.');
-    if (G.isPassedCourse(S, code)) return bad(code + ' is already passed in your logged courses.');
-    var f = parseInt(UI.$('#pa_f', el).value) || 0, a = parseInt(UI.$('#pa_a', el).value) || 0;
+  /** Validate and add one course to the plan. Returns an error string, or null when added. */
+  function addCourseFrom(o) {
+    var S = Store.get(), code = canon(S, o.code || ''), hasAtt = S.attempts.some(function (a) { return a.course === code; });
+    if (!code) return 'Enter a course code.';
+    if (!(o.cr > 0)) return 'Credits must be a positive number.';
+    if (o.term && !G.termOrder(o.term)) return 'Term not understood. Use e.g. Sep2026, or leave it empty.';
+    if (o.exp !== null && (isNaN(o.exp) || o.exp < 0 || o.exp > 100)) return 'Expected score must be between 0 and 100.';
+    if (S.plan.some(function (r) { return r.code === code; })) return code + ' is already in the plan. Edit its score or term instead.';
+    if (G.isPassedCourse(S, code)) return code + ' is already passed in your logged courses.';
     Store.update(function (S2) {
       var cur = S2.degree.curriculum.filter(function (c) { return c.code === code; })[0];
-      S2.plan.push({ code: code, name: name || (cur ? cur.name : ''), credits: cr, term: term, expected: exp, active: true, level: cur ? cur.level : undefined });
-      if (type === 'ret' && !hasAtt && f + a > 0) S2.carry[code] = { failed: f, absent: a, lastAbsent: a > 0 && f === 0 };
-      S2.ui.touched = S2.ui.touched || exp !== null;
+      S2.plan.push({ code: code, name: o.name || (cur ? cur.name : ''), credits: o.cr, term: o.term || '', expected: o.exp, active: true, level: cur ? cur.level : undefined });
+      if (o.type === 'ret' && !hasAtt && o.f + o.a > 0) S2.carry[code] = { failed: o.f, absent: o.a, lastAbsent: o.a > 0 && o.f === 0 };
+      S2.ui.touched = S2.ui.touched || o.exp !== null;
     }, { force: true });
-    msg.className = 'msg ok'; msg.textContent = 'Added ' + code + ' (' + cr + ' cr)' + (type === 'ret' || hasAtt ? ' as a retake.' : '.');
+    return null;
+  }
+  function addPlan() {
+    var S = Store.get(), msg = UI.$('#pa_msg', el);
+    var expRaw = UI.$('#pa_exp', el).value.trim(), type = UI.$('#pa_type', el).value;
+    var hasAtt = S.attempts.some(function (a) { return a.course === canon(S, UI.$('#pa_code', el).value); });
+    var err = addCourseFrom({ code: UI.$('#pa_code', el).value, name: UI.$('#pa_name', el).value.trim(), cr: parseFloat(UI.$('#pa_cr', el).value), term: UI.$('#pa_term', el).value.trim(),
+      exp: expRaw === '' ? null : parseFloat(expRaw), type: type, f: parseInt(UI.$('#pa_f', el).value) || 0, a: parseInt(UI.$('#pa_a', el).value) || 0 });
+    if (err) { msg.className = 'msg err'; msg.textContent = err; return; }
+    msg.className = 'msg ok'; msg.textContent = 'Added ' + canon(S, UI.$('#pa_code', el).value) + (type === 'ret' || hasAtt ? ' as a retake.' : '.');
     ['pa_code', 'pa_name', 'pa_exp'].forEach(function (id) { UI.$('#' + id, el).value = ''; });
     UI.$('#pa_type', el).disabled = false; UI.$('#pa_type', el).value = 'new'; UI.$('#pa_ret', el).hidden = true; UI.$('#pa_code', el).focus();
+  }
+
+  /* ----- semester calculator ----- */
+  function calcTermOf(S) {
+    var terms = boardTerms(S);
+    if (S.ui.calcTerm && terms.indexOf(S.ui.calcTerm) >= 0) return S.ui.calcTerm;
+    var st = startTerm(S), i = Math.max(0, terms.indexOf(st));
+    for (var k = i; k < terms.length; k++) { var inf = G.termInfo(terms[k], S.config.terms); if (!inf || inf.kind !== 'Summer') return terms[k]; }
+    return terms[i];
+  }
+  function calcCodeChanged() {
+    var S = Store.get(), code = canon(S, UI.$('#sc_code', el).value), cur = S.degree.curriculum.filter(function (c) { return c.code === code; })[0];
+    if (cur) UI.$('#sc_cr', el).value = cur.credits;
+    var type = UI.$('#sc_type', el), hasAtt = S.attempts.some(function (a) { return a.course === code; });
+    if (hasAtt) { type.value = 'ret'; type.disabled = true; UI.$('#sc_fw', el).hidden = true; UI.text(UI.$('#sc_msg', el), code + ' is in your logged courses: counted as a retake automatically.'); UI.$('#sc_msg', el).className = 'msg'; }
+    else { type.disabled = false; UI.$('#sc_fw', el).hidden = type.value !== 'ret'; }
+  }
+  function calcAdd() {
+    var S = Store.get(), msg = UI.$('#sc_msg', el), expRaw = UI.$('#sc_exp', el).value.trim(), type = UI.$('#sc_type', el).value, cur = calcTermOf(S);
+    var code = canon(S, UI.$('#sc_code', el).value), hasAtt = S.attempts.some(function (a) { return a.course === code; });
+    var idx = S.plan.findIndex(function (r) { return r.code === code; });
+    if (idx >= 0) {
+      Store.update(function (S2) {
+        var r = S2.plan[idx]; r.term = cur; r.active = true;
+        if (expRaw !== '' && !isNaN(parseFloat(expRaw))) { r.expected = Math.max(0, Math.min(100, parseFloat(expRaw))); S2.ui.touched = true; }
+      }, { force: true });
+      msg.className = 'msg ok'; msg.textContent = code + ' was already in your plan: moved into ' + cur + (expRaw !== '' ? ' with your score.' : '.');
+      ['sc_code', 'sc_exp'].forEach(function (id) { UI.$('#' + id, el).value = ''; });
+      UI.$('#sc_code', el).focus(); return;
+    }
+    var err = addCourseFrom({ code: UI.$('#sc_code', el).value, name: '', cr: parseFloat(UI.$('#sc_cr', el).value), term: cur, exp: expRaw === '' ? null : parseFloat(expRaw), type: type, f: parseInt(UI.$('#sc_f', el).value) || 0, a: 0 });
+    if (err) { msg.className = 'msg err'; msg.textContent = err; return; }
+    msg.className = 'msg ok'; msg.textContent = 'Added ' + code + ' to ' + cur + (type === 'ret' || hasAtt ? ' (retake: repeat penalty applied).' : '.');
+    ['sc_code', 'sc_exp'].forEach(function (id) { UI.$('#' + id, el).value = ''; });
+    UI.$('#sc_type', el).disabled = false; UI.$('#sc_type', el).value = 'new'; UI.$('#sc_fw', el).hidden = true; UI.$('#sc_code', el).focus();
+  }
+  function fillCalc(D, terms) {
+    var S = D.S, o = D.o, tot = D.tot, cur = calcTermOf(S), curO = G.termOrder(cur), info = G.termInfo(cur, S.config.terms);
+    var sel = UI.$('#calc_term', el);
+    UI.paint(sel, terms.map(function (t) { return '<option value="' + UI.esc(t) + '">' + UI.esc(UI.termLabel(S, t)) + '</option>'; }).join(''));
+    if (document.activeElement !== sel) sel.value = cur;
+    UI.text(UI.$('#calc_info', el), info ? info.kind + ' ' + info.academicYear + ': ' + info.detail : '');
+    var all = S.plan.map(function (r, i) { return { r: r, i: i, o: G.termOrder(String(r.term || '').trim()) }; }).filter(function (x) { return x.r.active !== false && x.o; });
+    var here = all.filter(function (x) { return x.o === curO; }), prior = all.filter(function (x) { return x.o < curO; });
+    var priorCodes = prior.map(function (x) { return x.r.code; }), hereCodes = here.map(function (x) { return x.r.code; });
+    var before = G.projectParts(S, Object.assign({}, o, { only: priorCodes, fill: false }), tot).cgpa;
+    var after = G.projectParts(S, Object.assign({}, o, { only: priorCodes.concat(hereCodes), fill: false }), tot);
+    var empty = !here.length;
+    UI.$('#calc_tw', el).hidden = empty; UI.$('#sc_allw', el).hidden = empty;
+    var res = '';
+    if (empty) res = '<div class="empty" style="padding:14px"><b>No courses in ' + UI.esc(cur) + ' yet</b>Add the courses you take in this term below. Each one you add moves your CGPA.</div>';
+    else {
+      var courses = here.map(function (x) { return x.r; }), sg = G.termGPA(S, courses, o, tot), cr = courses.reduce(function (s, c) { return s + (+c.credits || 0); }, 0), d = after.cgpa - before;
+      var ti = G.scoreForTarget(S, S.ui.target, { sn: o.sn, sr: o.sr, only: priorCodes.concat(hereCodes), uniformFor: hereCodes }, tot);
+      var tline = ti.already ? 'Your ' + UI.f(S.ui.target, 2) + ' target is already met by just passing these.' : ti.possible ? 'To have <b>' + UI.f(S.ui.target, 2) + '</b> by the end of this term you need about <b>' + UI.f(ti.score, 1) + '%</b> on average in these courses.' : 'A ' + UI.f(S.ui.target, 2) + ' CGPA is out of reach this term (best case ' + UI.f(ti.ceiling) + ').';
+      res = '<div class="grid3" style="gap:10px">' +
+        '<div class="stat"><div class="k">Semester GPA</div><div class="v">' + UI.f(sg, 2) + '</div><div class="d">≈ ' + UI.f(G.gpaToPct(sg, S.config), 1) + '% · ' + UI.num(cr) + ' cr this term</div></div>' +
+        '<div class="stat"><div class="k">New CGPA after ' + UI.esc(cur) + '</div><div class="v ' + (d >= 0 ? 'green' : 'red') + '">' + UI.f(after.cgpa) + '</div><div class="d">' + UI.signed(d) + ' from ' + UI.f(before) + (prior.length ? ' (with earlier planned terms)' : ' now') + '</div></div>' +
+        '<div class="stat"><div class="k">German grade (est.)</div><div class="v">' + UI.germanText(after.cgpa, S) + '</div><div class="d">was ' + UI.germanText(before, S) + '</div></div></div>' +
+        '<p class="note" style="margin:10px 0 0">' + tline + '</p>';
+    }
+    UI.paint(UI.$('#calc_result', el), res);
+    UI.paint(UI.$('#calc_tbl tbody', el), here.map(function (x) {
+      var r = x.r, rt = G.isRetake(S, r, tot), eff = G.expectedScore(r, rt, o.sn, o.sr), g = G.scoreToGPA(eff, false, r.code, tot.ctx);
+      var alone = G.projectParts(S, Object.assign({}, o, { only: priorCodes.concat([r.code]), fill: false }), tot).cgpa - before;
+      var nm = r.name || '';
+      return '<tr><td>' + UI.esc(r.code) + (nm ? ' <span class="muted">' + UI.esc(nm) + '</span>' : '') + ' <span class="tag ' + (rt ? 'ret' : 'new') + '">' + (rt ? 'retake' : 'new') + '</span></td>' +
+        '<td class="num">' + UI.field('plan.' + x.i + '.credits', r.credits, { min: 0.5, step: 0.5, label: 'Credits' }) + '</td>' +
+        '<td>' + UI.field('plan.' + x.i + '.expected', r.expected == null ? '' : r.expected, { type: 'numnull', min: 0, max: 100, ph: String(eff), label: 'Expected score' }) + '</td>' +
+        '<td>' + UI.badge(G.letter(eff, false, r.code, tot.ctx)) + '</td><td class="num">' + g.toFixed(1) + '</td>' +
+        '<td class="num ' + (alone >= 0 ? 'green' : 'red') + '">' + UI.signed(alone) + '</td>' +
+        '<td><button class="btn sm danger" data-act="delPlan" data-i="' + x.i + '" aria-label="Remove ' + UI.esc(r.code) + '">×</button></td></tr>';
+    }).join(''));
+    var note = 'Counts only courses planned for this term' + (prior.length ? ' plus the ' + prior.length + ' you planned in earlier terms' : '') + '. “Effect on CGPA” is what that course would do on its own. Retakes include their earlier fails as a repeat penalty automatically.';
+    var unsched = S.plan.filter(function (r) { return r.active !== false && !String(r.term || '').trim(); }).length;
+    if (unsched) note += ' ' + unsched + ' planned course' + (unsched === 1 ? ' has' : 's have') + ' no term yet and ' + (unsched === 1 ? 'is' : 'are') + ' not counted here.';
+    UI.text(UI.$('#calc_note', el), note);
   }
 
   function fill(D) {
     var S = D.S, tot = D.tot, o = D.o, cfg = S.config, c = UI.colors();
     var terms = boardTerms(S);
     UI.syncFields(el, S);
+    fillCalc(D, terms);
 
     /* datalists */
     var names = {}; S.degree.curriculum.forEach(function (x) { names[x.code] = x.name; });
     var open = S.degree.curriculum.filter(function (x) { return !(tot.byCode[x.code] && tot.byCode[x.code].passed); });
     UI.paint(UI.$('#dl_pcodes', el), open.map(function (x) { return '<option value="' + UI.esc(x.code) + '">' + UI.esc(x.name) + '</option>'; }).join(''));
-    UI.paint(UI.$('#dl_pterms', el), terms.map(function (t) { return '<option value="' + t + '">'; }).join(''));
+    UI.paint(UI.$('#dl_pterms', el), terms.map(function (t) { return '<option value="' + UI.esc(t) + '">' + UI.esc(UI.termLabel(S, t)) + '</option>'; }).join(''));
     var st = UI.$('#pl_start', el); if (document.activeElement !== st && !S.ui.startTerm) st.placeholder = startTerm(S);
 
     /* board */
@@ -182,7 +288,8 @@ UI.Plan = (function () {
     function col(label, key, items) {
       var cr = items.reduce(function (s, x) { return s + (+x.r.credits || 0); }, 0), pt = byTerm[key === '__none' ? 'Unassigned' : key], over = max && key !== '__none' && cr > max;
       var sub = key === '__none' ? 'not scheduled yet' : (pt ? 'term GPA ' + UI.f(G.termGPA(S, items.map(function (x) { return x.r; }), o, tot), 2) + ' · CGPA ' + UI.f(pt.cgpa) + ' (' + UI.signed(pt.delta) + ')' : 'drop courses here');
-      return '<div class="col" data-term="' + UI.esc(key) + '"><div class="col-h"><b>' + UI.esc(label) + '</b><span class="cr' + (over ? ' over' : '') + '">' + UI.num(cr) + ' cr' + (over ? ' ⚠' : '') + '</span></div><div class="col-s">' + sub + '</div>' +
+      var tag = key === '__none' ? '' : UI.termTag(S, key);
+      return '<div class="col" data-term="' + UI.esc(key) + '"><div class="col-h"><b>' + UI.esc(label) + '</b><span class="cr' + (over ? ' over' : '') + '">' + UI.num(cr) + ' cr' + (over ? ' ⚠' : '') + '</span></div>' + (tag ? '<div>' + tag + '</div>' : '') + '<div class="col-s">' + sub + '</div>' +
         items.map(function (x) { return chip(x.r, x.i); }).join('') + '</div>';
     }
     var act = S.plan.map(function (r, i) { return { r: r, i: i }; }).filter(function (x) { return x.r.active !== false; });
@@ -209,7 +316,7 @@ UI.Plan = (function () {
         '<td>' + UI.esc(r.code) + (nm ? ' <span class="muted">' + UI.esc(nm) + '</span>' : '') + '</td>' +
         '<td>' + UI.field('plan.' + i + '.credits', r.credits, { min: 0.5, step: 0.5, label: 'Credits' }) + '</td>' +
         '<td>' + histCell + '</td>' +
-        '<td>' + UI.select('plan.' + i + '.term', String(r.term || ''), [['', '–']].concat(terms.map(function (t) { return [t, t]; })), { label: 'Term' }) + '</td>' +
+        '<td>' + UI.select('plan.' + i + '.term', String(r.term || ''), [['', '–']].concat(terms.map(function (t) { return [t, UI.termLabel(S, t)]; })), { label: 'Term' }) + '</td>' +
         '<td>' + UI.field('plan.' + i + '.expected', r.expected == null ? '' : r.expected, { type: 'numnull', min: 0, max: 100, ph: String(eff), label: 'Expected score' }) + '</td>' +
         '<td class="num">' + G.scoreToGPA(eff, false, r.code, tot.ctx).toFixed(1) + '</td>' +
         '<td><button class="btn sm danger" data-act="delPlan" data-i="' + i + '" aria-label="Remove ' + UI.esc(r.code) + '">×</button></td></tr>';

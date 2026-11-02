@@ -32,7 +32,7 @@ UI.Welcome = (function () {
       '<label>Hours counted in CGPA <span class="help" title="The credit hours your university used to compute that CGPA. If you never failed or missed a course this equals your passed hours. If you did, it is higher, because failed attempts still count in the denominator.">?</span><input type="number" id="q_gh" min="1" step="0.5" placeholder="e.g. 96"></label>' +
       '<label>Hours passed (earned)<input type="number" id="q_eh" min="0" step="0.5" placeholder="same as left if no fails"></label>' +
       '<label>Hours to graduate<input type="number" id="q_tot" min="1" value="146" list="totlist"></label>' +
-      '<label>As of term (optional)<input type="text" id="q_asof" placeholder="Sep2026" style="width:110px"></label>' +
+      '<label>Results as of (exam period) <span class="help" title="The exam period of your latest results: Jan = Term 1 exams (Dec/Jan), May = Term 2 exams (May/Jun), Sep = summer exams (Aug/Sep). Planning starts from the one after it.">?</span><input type="text" id="q_asof" placeholder="Jan2027" style="width:110px"></label>' +
       '</div><datalist id="totlist"><option value="120"><option value="132"><option value="136"><option value="140"><option value="144"><option value="146"></datalist>' +
       '<div class="cfg" style="margin-top:12px"><label>Course list for autofill (optional)<select id="q_tpl">' + tplOptions('blank') + '</select></label></div>' +
       '<p class="msg" id="q_msg" style="margin:10px 0"></p>' +

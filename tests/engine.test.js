@@ -52,6 +52,33 @@ test('terms: parsing and rolling to the next term', () => {
   assert.deepStrictEqual(G.termsAhead('May2026', 3), ['Sep2026', 'Jan2027', 'May2027']);
 });
 
+test('exam periods: Dec = Jan (Term 1), Jun = May (Term 2), Aug = Sep (summer)', () => {
+  assert.strictEqual(G.termOrder('Dec2026'), G.termOrder('Jan2027'));
+  assert.strictEqual(G.termOrder('Jun2027'), G.termOrder('May2027'));
+  assert.strictEqual(G.termOrder('Aug2027'), G.termOrder('Sep2027'));
+  assert.ok(G.termOrder('Jan2027') < G.termOrder('May2027') && G.termOrder('May2027') < G.termOrder('Sep2027'));
+  assert.strictEqual(G.termOrder('Summer 2027'), 202706);   // a season word is not an alias
+});
+test('term info names the exam period and academic year', () => {
+  assert.strictEqual(G.termInfo('Jan2027').text, 'Term 1 · 2026/27');
+  assert.strictEqual(G.termInfo('Dec2026').text, 'Term 1 · 2026/27');
+  assert.strictEqual(G.termInfo('May2027').text, 'Term 2 · 2026/27');
+  assert.strictEqual(G.termInfo('Sep2027').text, 'Summer · 2026/27');
+  assert.strictEqual(G.termInfo('Fall2026', ['Fall', 'Spring']).text, 'Term 1 · 2026/27');
+  assert.strictEqual(G.termInfo('nonsense'), null);
+});
+test('attempts logged as Dec and Jan land in the same term', () => {
+  const p = profile({ attempts: [att('Dec2026', 'A', 4, 80), att('Jan2027', 'B', 2, 70)] });
+  assert.strictEqual(G.semesterGPAs(p).length, 1);
+});
+test('uniformFor applies the uniform score to chosen courses only', () => {
+  const p = Store.blank({ mode: 'quick', cgpa: 2.0, gpaHours: 60, earnedHours: 60, totalCredits: 66 });
+  p.ui.fill = false;
+  p.plan = [{ code: 'A', credits: 3, expected: 70, active: true, term: 'Jan2027' }, { code: 'B', credits: 3, expected: 90, active: true, term: 'May2027' }];
+  const v = G.projectFinal(p, { uniform: 100, uniformFor: ['B'] });
+  near(v, (120 + 3 * 2 + 3 * 5) / 66, 1e-9);
+});
+
 /* ------------------------------------------------------------ CGPA */
 test('hand-computed CGPA with a failed-then-passed course and an absence', () => {
   // A 4cr 80 -> g3 ; B 2cr fail 55 then 70 -> g2, drag .96 ; C 3cr absent then 90 -> g4, drag 1.0

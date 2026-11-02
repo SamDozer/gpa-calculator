@@ -16,6 +16,13 @@ UI.Settings = (function () {
       '<label>Hours passed<input type="number" step="0.5" data-path="baseline.earnedHours" data-type="num" min="0"></label><label>As of term<input type="text" data-path="baseline.asOf" data-type="str" style="width:100px"></label></div>' +
       '<p class="note" style="margin-top:8px">Courses you failed earlier are still in the denominator, so hours counted can be higher than hours passed. For a retake of one of those, mark it as a retake in the Plan tab so its repeat penalty is applied.</p></div></div>' +
 
+      '<div class="card"><h2><span class="n">CAL</span> Term calendar</h2>' +
+      '<p class="note">Every term in this app is named by its <b>exam period</b>, because that is when results (and your CGPA) change. Typing the month your exams fall in is enough:</p>' +
+      '<div class="tw"><table><thead><tr><th>Write</th><th>Meaning</th><th>Starts</th></tr></thead><tbody>' +
+      '<tr><td class="mono"><b>Jan</b> or Dec</td><td>Term 1 exams (December / January)</td><td>autumn (Sep/Oct)</td></tr>' +
+      '<tr><td class="mono"><b>May</b> or Jun</td><td>Term 2 exams (late May / early June)</td><td>February</td></tr>' +
+      '<tr><td class="mono"><b>Sep</b> or Aug</td><td>Summer exams (August / September)</td><td>after Term 2</td></tr></tbody></table></div>' +
+      '<p class="note" style="margin:10px 0 0">So <span class="mono">Dec2026</span> and <span class="mono">Jan2027</span> are the same term (Term 1 of 2026/27), <span class="mono">May2027</span> / <span class="mono">Jun2027</span> are Term 2, and <span class="mono">Aug2027</span> / <span class="mono">Sep2027</span> are the summer exams of that same academic year. Other universities can rename the terms in “Term names in a year” above (for example Fall, Spring).</p></div>' +
       '<div class="card"><h2><span class="n">CFG</span> Grading rules</h2>' +
       '<p class="note">Defaults match the Cairo University Faculty of Science credit-hour system. Every number is editable if your faculty differs.</p>' +
       '<div class="cfg"><label>Pass mark<input type="number" data-path="config.subjectPass" data-type="num"></label><label>University-req. pass<input type="number" data-path="config.requirementPass" data-type="num"></label>' +

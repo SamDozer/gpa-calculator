@@ -104,7 +104,7 @@ UI.Projection = (function () {
     else if (info.already) tout.innerHTML = '<b>' + UI.f(tgt, 2) + ' is already secured</b> if you pass everything planned (bare-pass floor: ' + UI.f(info.floor) + ').';
     else tout.innerHTML = 'To reach <b>' + UI.f(tgt, 2) + '</b> you need about <b>' + UI.f(info.score, 1) + '%</b> on average across all <b>' + UI.num(parts.items.reduce(function (s, x) { return s + x.cr; }, 0) + parts.unallocated.credits) + ' planned credits</b> (needs Q = ' + UI.f(cf.neededQ(tgt), 1) + ' of max ' + UI.f(cf.Qmax, 1) + ').';
     var groups = G.planTerms(S).filter(function (g) { return g.term !== 'Unassigned'; }), ts = UI.$('#t_term', el);
-    UI.paint(ts, groups.length ? groups.map(function (g) { return '<option value="' + UI.esc(g.term) + '">' + UI.esc(g.term) + '</option>'; }).join('') : '<option value="">(assign terms on the Plan tab)</option>');
+    UI.paint(ts, groups.length ? groups.map(function (g) { return '<option value="' + UI.esc(g.term) + '">' + UI.esc(UI.termLabel(S, g.term)) + '</option>'; }).join('') : '<option value="">(assign terms on the Plan tab)</option>');
     var sel = S.ui._tterm && groups.some(function (g) { return g.term === S.ui._tterm; }) ? S.ui._tterm : (groups[0] && groups[0].term);
     if (sel && document.activeElement !== ts) ts.value = sel;
     var tto = UI.$('#t_term_out', el);
