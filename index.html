@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GPA Planner for Science Students</title>
+<meta name="description" content="Free, private GPA planner for credit-hour (0-5) science programmes. Track your CGPA, plan next semester, and see what you need to hit a target. Runs in your browser; nothing is uploaded.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+</head>
+<body>
+<div id="app">
+  <header class="hdr" id="hdr" hidden>
+    <div class="hdr-in">
+      <div class="hdr-top">
+        <h1 class="brand">GPA <span class="em">Planner</span></h1>
+        <span class="who" id="who"></span>
+        <span class="spacer"></span>
+        <button class="btn icon-btn" id="btnUndo" title="Undo (Ctrl+Z)" aria-label="Undo">↶</button>
+        <button class="btn icon-btn" id="btnRedo" title="Redo (Ctrl+Y)" aria-label="Redo">↷</button>
+        <button class="btn icon-btn" id="btnTheme" title="Light / dark" aria-label="Toggle theme">◐</button>
+        <div class="rel">
+          <button class="btn" id="btnMenu" aria-haspopup="true">Data ▾</button>
+          <div class="menu" id="menu" hidden></div>
+        </div>
+      </div>
+      <div class="kpis" id="kpis"></div>
+      <nav class="tabs" id="tabs" aria-label="Sections"></nav>
+    </div>
+  </header>
+  <div class="wrap">
+    <main id="view"></main>
+    <p class="foot" id="foot"></p>
+  </div>
+</div>
+<div class="toast-box" id="toasts" aria-live="polite"></div>
+
+<script src="data/templates.js"></script>
+<script src="data/sample.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/io.js"></script>
+<script src="js/store.js"></script>
+<script src="js/ui/common.js"></script>
+<script src="js/ui/welcome.js"></script>
+<script src="js/ui/overview.js"></script>
+<script src="js/ui/transcript.js"></script>
+<script src="js/ui/plan.js"></script>
+<script src="js/ui/projection.js"></script>
+<script src="js/ui/analytics.js"></script>
+<script src="js/ui/settings.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

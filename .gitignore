@@ -1,0 +1,7 @@
+# personal data must never be committed here (keep it in a private repo)
+profile*.json
+gpa-profile*.json
+courses*.csv
+node_modules/
+.DS_Store
+Thumbs.db
