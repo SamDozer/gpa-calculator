@@ -6,7 +6,7 @@
 window.I18N = (function () {
   'use strict';
   var KEY = 'gpa-calculator:lang', lang = 'en', dict = null, obs = null, busy = false, scheduled = false, missing = {};
-  var TOKEN = /[A-Za-z]+\d[\w()\/\-.]*|\d+(?:\.\d+)?/g;
+  var TOKEN = /[A-Za-z]+\d+(?:\(\w+\))?|\d+(?:\.\d+)?/g;   // codes like BT411(1), Jan2027, then plain numbers
 
   function detect() {
     try { var s = localStorage.getItem(KEY); if (s === 'ar' || s === 'en') return s; } catch (e) {}
@@ -17,23 +17,33 @@ window.I18N = (function () {
     var nums = [], key = s.replace(TOKEN, function (m) { nums.push(m); return '#'; });
     return { key: key, nums: nums };
   }
+  function core(c, depth) {
+    var hit = dict[c];
+    if (hit !== undefined) return hit;
+    var n = norm(c); hit = dict[n.key];
+    if (hit !== undefined) { var i = 0; return hit.replace(/#/g, function () { return n.nums[i++] !== undefined ? n.nums[i - 1] : '#'; }); }
+    // known endings such as " · new" or the class word after a GPA
+    var suf = window.I18N_AR_SUFFIX || [];
+    for (var k = 0; k < suf.length && !depth; k++) {
+      var sx = suf[k][0];
+      if (c.length > sx.length && c.slice(-sx.length) === sx) { var base = core(c.slice(0, -sx.length), 1); return (base === null ? c.slice(0, -sx.length) : base) + suf[k][1]; }
+    }
+    if (window.__I18N_HARVEST) missing[n.key] = c;
+    return null;
+  }
   function t(s) {
     if (lang !== 'ar' || !dict || typeof s !== 'string') return s;
-    var lead = s.match(/^\s*/)[0], trail = s.match(/\s*$/)[0], core = s.trim();
-    if (!core || !/[A-Za-z]/.test(core)) return s;
-    var hit = dict[core];
-    if (hit !== undefined) return lead + hit + trail;
-    var n = norm(core); hit = dict[n.key];
-    if (hit === undefined) { if (window.__I18N_HARVEST) missing[n.key] = core; return s; }
-    var i = 0;
-    return lead + hit.replace(/#/g, function () { return n.nums[i++] !== undefined ? n.nums[i - 1] : '#'; }) + trail;
+    var lead = s.match(/^\s*/)[0], trail = s.match(/\s*$/)[0], c = s.trim();
+    if (!c || !/[A-Za-z]/.test(c)) return s;
+    var r = core(c, 0);
+    return r === null ? s : lead + r + trail;
   }
 
   var ATTRS = ['placeholder', 'title', 'aria-label', 'label'];
   function walk(root) {
     var w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT, {
       acceptNode: function (n) {
-        if (n.nodeType === 1) { var tn = n.tagName; return (tn === 'SCRIPT' || tn === 'STYLE' || tn === 'TEXTAREA' || tn === 'CANVAS' || n.hasAttribute('data-noi18n')) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_SKIP; }
+        if (n.nodeType === 1) { var tn = n.tagName; return (tn === 'SCRIPT' || tn === 'STYLE' || tn === 'NOSCRIPT' || tn === 'TEXTAREA' || tn === 'CANVAS' || n.hasAttribute('data-noi18n')) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_SKIP; }
         return NodeFilter.FILTER_ACCEPT;
       }
     }), n;
@@ -48,7 +58,7 @@ window.I18N = (function () {
   }
   function schedule() {
     if (scheduled) return; scheduled = true;
-    requestAnimationFrame(function () { scheduled = false; apply(document.body); });
+    setTimeout(function () { scheduled = false; apply(document.body); }, 20);   // not rAF: it is paused in background tabs
   }
   function start() {
     lang = detect(); dict = window.I18N_AR || null;

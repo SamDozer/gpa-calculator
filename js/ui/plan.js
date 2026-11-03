@@ -345,10 +345,10 @@ UI.Plan = (function () {
     if (!pts.length) { UI.$('#ch_plan', el).parentNode.hidden = true; UI.$('#e_plan', el).hidden = false; UI.$('#e_plan', el).innerHTML = '<b>Nothing scheduled</b>Drag courses into terms (or press Auto-distribute) to see the path.'; }
     else {
       UI.$('#ch_plan', el).parentNode.hidden = false; UI.$('#e_plan', el).hidden = true;
-      var labels = ['Now'].concat(pts.map(function (p) { return p.term === 'Unassigned' ? 'Unscheduled' : p.term; })), vals = [tl.start].concat(pts.map(function (p) { return p.cgpa; }));
+      var labels = [UI.tr('Now')].concat(pts.map(function (p) { return p.term === 'Unassigned' ? UI.tr('Unscheduled') : p.term; })), vals = [tl.start].concat(pts.map(function (p) { return p.cgpa; }));
       UI.chart('ch_plan', 'line', { labels: labels, datasets: [
-        { label: 'Projected CGPA', data: vals, borderColor: c.purple, backgroundColor: UI.alpha(c.purple, 0.1), borderWidth: 2.5, fill: true, tension: 0.25, pointRadius: 4, pointBackgroundColor: c.card, pointBorderColor: c.purple, pointBorderWidth: 2 },
-        { label: 'Target', data: labels.map(function () { return S.ui.target; }), borderColor: c.ink2, borderWidth: 1.2, borderDash: [6, 5], pointRadius: 0 }
+        { label: UI.tr('Projected CGPA'), data: vals, borderColor: c.purple, backgroundColor: UI.alpha(c.purple, 0.1), borderWidth: 2.5, fill: true, tension: 0.25, pointRadius: 4, pointBackgroundColor: c.card, pointBorderColor: c.purple, pointBorderWidth: 2 },
+        { label: UI.tr('Target'), data: labels.map(function () { return S.ui.target; }), borderColor: c.ink2, borderWidth: 1.2, borderDash: [6, 5], pointRadius: 0 }
       ] }, UI.lineOpts(UI.axis(vals.concat([S.ui.target]), { ceil: cfg.maxGPA })));
     }
     UI.paint(UI.$('#plan_tbl tbody', el), pts.map(function (p) {

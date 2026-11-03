@@ -172,7 +172,7 @@ UI.Projection = (function () {
     var o = UI.lineOpts({ min: 0, max: Math.max.apply(null, m.hist) * 1.1 }, {});
     o.scales.y.ticks = { display: false }; o.scales.y.grid = { display: false }; o.scales.x.ticks = { maxTicksLimit: 6 };
     o.plugins.tooltip = { callbacks: { title: function (x) { return 'CGPA ≈ ' + x[0].label; }, label: function (x) { return ' ' + (100 * x.parsed.y / m.runs).toFixed(1) + '% of runs'; } } };
-    UI.chart('ch_mc', 'bar', { labels: labels, datasets: [{ label: 'Runs', data: m.hist, backgroundColor: colors, borderWidth: 0, borderRadius: 2, categoryPercentage: 1, barPercentage: 0.95 }] }, o);
+    UI.chart('ch_mc', 'bar', { labels: labels, datasets: [{ label: UI.tr('Runs'), data: m.hist, backgroundColor: colors, borderWidth: 0, borderRadius: 2, categoryPercentage: 1, barPercentage: 0.95 }] }, o);
     UI.text(UI.$('#mc_n', el), m.runs + ' simulated outcomes');
     var prob = m.targets.map(function (t) { return '<div class="stat" style="margin-bottom:8px"><div class="k">P(final ≥ ' + t.target.toFixed(2) + ')</div><div class="v ' + (t.prob >= 0.5 ? 'green' : 'amber') + '">' + (t.prob * 100).toFixed(0) + '%</div></div>'; }).join('');
     UI.paint(UI.$('#mc_stats', el), '<div class="stat" style="margin-bottom:8px"><div class="k">Likely range (90%)</div><div class="v">' + UI.f(m.p5, 2) + ' – ' + UI.f(m.p95, 2) + '</div><div class="d">median ' + UI.f(m.p50) + ' · middle half ' + UI.f(m.p25, 2) + ' – ' + UI.f(m.p75, 2) + '</div></div>' + prob);

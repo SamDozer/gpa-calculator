@@ -228,3 +228,4 @@ html[dir="rtl"] .cfg input[type=text],html[dir="rtl"] table input[type=text]{dir
 html[dir="rtl"] details>summary{font-family:'Cairo',sans-serif}
 html[dir="rtl"] .hdr .who{letter-spacing:0}
 html[dir="rtl"] #btnLang{font-family:'Cairo',sans-serif;font-weight:600}
+html[dir="rtl"] .kpi .v,html[dir="rtl"] .stat .v,html[dir="rtl"] .gauge{direction:ltr;text-align:right}

@@ -28,7 +28,7 @@ UI.Analytics = (function () {
     var dc = { A: 0, B: 0, C: 0, D: 0, F: 0, AB: 0 };
     rows.forEach(function (a) { var ab = a.absent || a.score == null; dc[G.letter(ab ? null : a.score, ab, a.course, ctx)]++; });
     var yo = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid: { color: c.grid }, ticks: { precision: 0 } }, x: { grid: { display: false } } } };
-    UI.chart('ch_dist', 'bar', { labels: ['A', 'B', 'C', 'D', 'F', 'Absent'], datasets: [{ data: order.map(function (k) { return dc[k]; }), backgroundColor: order.map(function (k) { return col[k]; }), borderWidth: 0, borderRadius: 5 }] }, yo);
+    UI.chart('ch_dist', 'bar', { labels: ['A', 'B', 'C', 'D', 'F', UI.tr('Absent')], datasets: [{ data: order.map(function (k) { return dc[k]; }), backgroundColor: order.map(function (k) { return col[k]; }), borderWidth: 0, borderRadius: 5 }] }, yo);
 
     /* CH4 */
     var areas = {};
@@ -41,14 +41,14 @@ UI.Analytics = (function () {
     var years = {};
     rows.forEach(function (a) { var o = G.termOrder(a.term), y = o ? Math.floor(o / 100) : '?'; years[y] = years[y] || { A: 0, B: 0, C: 0, D: 0, F: 0, AB: 0 }; var ab = a.absent || a.score == null; years[y][G.letter(ab ? null : a.score, ab, a.course, ctx)]++; });
     var yl = Object.keys(years).sort();
-    UI.chart('ch_mixyear', 'bar', { labels: yl, datasets: order.map(function (k) { return { label: k === 'AB' ? 'Absent' : k, data: yl.map(function (y) { return years[y][k]; }), backgroundColor: col[k], borderWidth: 0, stack: 's' }; }) },
+    UI.chart('ch_mixyear', 'bar', { labels: yl, datasets: order.map(function (k) { return { label: k === 'AB' ? UI.tr('Absent') : k, data: yl.map(function (y) { return years[y][k]; }), backgroundColor: col[k], borderWidth: 0, stack: 's' }; }) },
       { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, boxHeight: 10, font: { size: 10.5 }, padding: 10 } } }, scales: { x: { stacked: true, grid: { display: false } }, y: { stacked: true, grid: { color: c.grid }, ticks: { precision: 0 } } } });
 
     /* drag */
     var dr = D.tot.courses.filter(function (x) { return !x.excluded && x.cr * x.drag > 0.001; }).sort(function (a, b) { return b.cr * b.drag - a.cr * a.drag; }).slice(0, 12);
     UI.chart('ch_drag', 'bar', { labels: dr.map(function (x) { return x.code; }), datasets: [{ data: dr.map(function (x) { return x.cr * x.drag; }), backgroundColor: dr.map(function (x) { return x.passed ? c.blue : c.amber; }), borderWidth: 0, borderRadius: 5, barThickness: 14 }] },
       { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: function (x) { var r = dr[x.dataIndex]; return ' +' + x.parsed.x.toFixed(2) + ' effective cr (' + r.cr + ' cr × ' + r.drag.toFixed(2) + ')' + (r.passed ? ', passed' : ', not passed'); } } } },
-        scales: { x: { grid: { color: c.grid }, title: { display: true, text: 'extra credits in denominator', font: { size: 10 } } }, y: { grid: { display: false } } } });
+        scales: { x: { grid: { color: c.grid }, title: { display: true, text: UI.tr('extra credits in denominator'), font: { size: 10 } } }, y: { grid: { display: false } } } });
 
     /* credits over time */
     var tl = D.timeline.filter(function (t) { return !t.base; }), reg = 0, byTerm = {};
@@ -58,8 +58,8 @@ UI.Analytics = (function () {
     var lb = tl.map(function (t) { return String(t.label).replace(/^([A-Za-z؀-ۿ]+)\s*(\d\d)(\d\d)$/, "$1 '$3"); });
     var lo = UI.lineOpts({ min: 0, max: Math.max.apply(null, regS.concat([1])) * 1.1 }, { legend: true, dec: 0 });
     UI.chart('ch_credits', 'line', { labels: lb, datasets: [
-      { label: 'Registered', data: regS, borderColor: c.slate, borderWidth: 2, tension: 0.2, pointRadius: 2 },
-      { label: 'Passed', data: earnS, borderColor: c.green, backgroundColor: UI.alpha(c.green, 0.12), borderWidth: 2.5, fill: true, tension: 0.2, pointRadius: 3 }] }, lo);
+      { label: UI.tr('Registered'), data: regS, borderColor: c.slate, borderWidth: 2, tension: 0.2, pointRadius: 2 },
+      { label: UI.tr('Passed'), data: earnS, borderColor: c.green, backgroundColor: UI.alpha(c.green, 0.12), borderWidth: 2.5, fill: true, tension: 0.2, pointRadius: 3 }] }, lo);
   }
 
   return { mount: mount, fill: fill };

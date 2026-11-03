@@ -94,10 +94,10 @@ UI.Overview = (function () {
     var emptyTl = !tl.length && !plan.points.length;
     if (!setEmpty('e_timeline', 'ch_timeline', emptyTl ? '<b>Nothing to chart yet</b>Set your starting point or add courses.' : '')) {
       UI.chart('ch_timeline', 'line', { labels: labels, datasets: [
-        { label: 'Computed CGPA', data: computed, borderColor: c.green, backgroundColor: UI.alpha(c.green, 0.1), borderWidth: 2.5, fill: true, tension: 0.3, pointRadius: 3, pointBackgroundColor: c.card, pointBorderColor: c.green, pointBorderWidth: 2 },
-        { label: 'Official', data: off, borderColor: c.blue, borderWidth: 2, borderDash: [2, 2], pointRadius: 4, pointBackgroundColor: c.blue, showLine: false },
-        { label: 'Plan (projected)', data: proj, borderColor: c.purple, borderWidth: 2.5, borderDash: [5, 4], tension: 0.25, pointRadius: 4, pointBackgroundColor: c.card, pointBorderColor: c.purple, pointBorderWidth: 2 },
-        { label: 'Target', data: labels.map(function () { return tgt; }), borderColor: c.ink2, borderWidth: 1.2, borderDash: [6, 5], pointRadius: 0 }
+        { label: UI.tr('Computed CGPA'), data: computed, borderColor: c.green, backgroundColor: UI.alpha(c.green, 0.1), borderWidth: 2.5, fill: true, tension: 0.3, pointRadius: 3, pointBackgroundColor: c.card, pointBorderColor: c.green, pointBorderWidth: 2 },
+        { label: UI.tr('Official'), data: off, borderColor: c.blue, borderWidth: 2, borderDash: [2, 2], pointRadius: 4, pointBackgroundColor: c.blue, showLine: false },
+        { label: UI.tr('Plan (projected)'), data: proj, borderColor: c.purple, borderWidth: 2.5, borderDash: [5, 4], tension: 0.25, pointRadius: 4, pointBackgroundColor: c.card, pointBorderColor: c.purple, pointBorderWidth: 2 },
+        { label: UI.tr('Target'), data: labels.map(function () { return tgt; }), borderColor: c.ink2, borderWidth: 1.2, borderDash: [6, 5], pointRadius: 0 }
       ] }, UI.lineOpts(UI.axis(all, { ceil: cfg.maxGPA }), { legend: true }));
     }
 
@@ -105,8 +105,8 @@ UI.Overview = (function () {
     var sems = D.sems;
     if (!setEmpty('e_semtrend', 'ch_semtrend', sems.length ? '' : '<b>No terms yet</b>Add past courses on the Courses tab to see how each term went.')) {
       UI.chart('ch_semtrend', 'line', { labels: sems.map(function (s) { return short(s.label); }), datasets: [
-        { label: 'Term GPA', data: sems.map(function (s) { return s.gpa; }), borderColor: c.purple, backgroundColor: UI.alpha(c.purple, 0.1), borderWidth: 2.5, fill: true, tension: 0.32, pointRadius: 3, pointBackgroundColor: c.card, pointBorderColor: c.purple, pointBorderWidth: 2 },
-        { label: 'Target', data: sems.map(function () { return tgt; }), borderColor: c.ink2, borderWidth: 1.2, borderDash: [6, 5], pointRadius: 0 }
+        { label: UI.tr('Term GPA'), data: sems.map(function (s) { return s.gpa; }), borderColor: c.purple, backgroundColor: UI.alpha(c.purple, 0.1), borderWidth: 2.5, fill: true, tension: 0.32, pointRadius: 3, pointBackgroundColor: c.card, pointBorderColor: c.purple, pointBorderWidth: 2 },
+        { label: UI.tr('Target'), data: sems.map(function () { return tgt; }), borderColor: c.ink2, borderWidth: 1.2, borderDash: [6, 5], pointRadius: 0 }
       ] }, UI.lineOpts({ min: 0, max: cfg.maxGPA }, { dec: 2, step: 1 }));
     }
 
@@ -114,7 +114,7 @@ UI.Overview = (function () {
     var act = S.plan.filter(function (r) { return r.active !== false; }), newC = 0, retC = 0;
     act.forEach(function (r) { if (G.isRetake(S, r, D.tot)) retC += +r.credits || 0; else newC += +r.credits || 0; });
     var unp = Math.max(0, D.cs.remaining - newC - retC);
-    UI.chart('ch_credit', 'doughnut', { labels: ['Earned', 'Planned · new', 'Planned · retake', 'Not planned'], datasets: [{
+    UI.chart('ch_credit', 'doughnut', { labels: ['Earned', 'Planned · new', 'Planned · retake', 'Not planned'].map(UI.tr), datasets: [{
       data: [D.cs.earned, newC, retC, unp], backgroundColor: [c.green, c.blue, c.amber, c.line], borderWidth: 2, borderColor: c.card }] },
       { responsive: true, maintainAspectRatio: false, cutout: '62%', plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, boxHeight: 10, font: { size: 11 }, padding: 12 } },
         tooltip: { callbacks: { label: function (x) { return ' ' + x.label + ': ' + x.parsed + ' cr'; } } } } });
@@ -122,13 +122,13 @@ UI.Overview = (function () {
     /* CH6 */
     var hasPlan = act.length > 0 || D.parts.unallocated.credits > 0;
     if (!setEmpty('e_proj', 'ch_proj', hasPlan ? '' : '<b>No plan yet</b>Add courses on the Plan tab to compare scenarios.')) {
-      var sc = [['Now', D.tot.cgpa], ['Conserv. 75/60', G.projectFinal(S, { sn: 75, sr: 60 }, D.tot)], ['Realistic 85/65', G.projectFinal(S, { sn: 85, sr: 65 }, D.tot)],
-        ['Optimistic 92/78', G.projectFinal(S, { sn: 92, sr: 78 }, D.tot)], ['Perfect', G.projectFinal(S, { sn: 100, sr: 100 }, D.tot)], ['Your plan', D.parts.cgpa]];
+      var sc = [[UI.tr('Now'), D.tot.cgpa], [UI.tr('Conserv. 75/60'), G.projectFinal(S, { sn: 75, sr: 60 }, D.tot)], [UI.tr('Realistic 85/65'), G.projectFinal(S, { sn: 85, sr: 65 }, D.tot)],
+        [UI.tr('Optimistic 92/78'), G.projectFinal(S, { sn: 92, sr: 78 }, D.tot)], [UI.tr('Perfect'), G.projectFinal(S, { sn: 100, sr: 100 }, D.tot)], [UI.tr('Your plan'), D.parts.cgpa]];
       var vals = sc.map(function (x) { return x[1]; }), ax = UI.axis(vals.concat([tgt]), { ceil: cfg.maxGPA });
       var o = UI.lineOpts(ax, {}); o.interaction = { mode: 'index', intersect: false };
       UI.chart('ch_proj', 'bar', { labels: sc.map(function (x) { return x[0]; }), datasets: [
-        { type: 'bar', label: 'Graduating CGPA', data: vals, backgroundColor: vals.map(function (v, i) { return i === 0 ? c.slate : i === vals.length - 1 ? c.purple : (v >= tgt ? c.green : c.sand); }), borderWidth: 0, borderRadius: 5 },
-        { type: 'line', label: 'Target', data: sc.map(function () { return tgt; }), borderColor: c.ink2, borderWidth: 1.2, borderDash: [6, 5], pointRadius: 0 }
+        { type: 'bar', label: UI.tr('Graduating CGPA'), data: vals, backgroundColor: vals.map(function (v, i) { return i === 0 ? c.slate : i === vals.length - 1 ? c.purple : (v >= tgt ? c.green : c.sand); }), borderWidth: 0, borderRadius: 5 },
+        { type: 'line', label: UI.tr('Target'), data: sc.map(function () { return tgt; }), borderColor: c.ink2, borderWidth: 1.2, borderDash: [6, 5], pointRadius: 0 }
       ] }, o);
     }
 

@@ -11,6 +11,7 @@ Source: https://github.com/SamDozer/gpa-calculator
 - Target solver: the average score needed to reach a target CGPA, or whether it is impossible.
 - Quick start from only a current CGPA and hours, or full transcript entry (paste from Excel/CSV).
 - Risk simulation, German grade estimate (Modified Bavarian formula), graduation-statement classification.
+- The interface is available in Egyptian Arabic (right-to-left) via the language button in the header.
 - Terms are named by exam period: Jan/Dec = Term 1, May/Jun = Term 2, Sep/Aug = summer exams.
 
 ## Key facts about the grading model
