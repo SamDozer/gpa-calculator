@@ -142,6 +142,19 @@
     if (!(nmax > nmin)) return null;
     return 1 + 3 * (nmax - nd) / (nmax - nmin);
   }
+  /**
+   * Degree classification as the faculty prints it on a graduation statement:
+   *   Excellent 3.5-5 (85-100%), Very Good 2.5-3.4 (75-84%), Good 1.5-2.4 (65-74%), Pass 1-1.4 (60-64%).
+   * The printed GPA has 1 decimal and the percentage is a whole number, both rounded to nearest, never truncated:
+   * a record of 3.4527 (84.53%) was printed as 3.5 / 85% / Excellent.
+   */
+  var CLASS_BANDS = [[3.5, 'Excellent', '85–100%'], [2.5, 'Very Good', '75–84%'], [1.5, 'Good', '65–74%'], [1.0, 'Pass', '60–64%']];
+  function classify(cgpa, cfg) {
+    cfg = cfg || DEFAULT_CONFIG;
+    var r1 = Math.round(cgpa * 10 + 1e-9) / 10, band = null;
+    for (var i = 0; i < CLASS_BANDS.length; i++) if (r1 >= CLASS_BANDS[i][0] - 1e-9) { band = CLASS_BANDS[i]; break; }
+    return { printedGPA: r1, printedPct: Math.round(cgpa * cfg.gpaDivisor + cfg.gpaOffset), band: band ? band[1] : 'Below pass', range: band ? band[2] : '' };
+  }
   function germanClass(x) {
     if (x == null) return ['n/a', ''];
     if (x <= 1.5) return ['sehr gut', 'green']; if (x <= 2.5) return ['gut', 'green'];
@@ -189,13 +202,19 @@
   }
 
   /* ----------------------------------------------------- transcript -> CGPA */
+  /** alias code -> canonical curriculum code (curriculum entries may carry aliases[]). */
+  function aliasMap(p) {
+    var m = {};
+    ((p.degree && p.degree.curriculum) || []).forEach(function (c) { (c.aliases || []).forEach(function (a) { m[a] = c.code; }); });
+    return m;
+  }
   function groupCourses(p, upto) {
-    var by = {};
+    var by = {}, al = aliasMap(p);
     (p.attempts || []).forEach(function (a, i) {
       var o = termOrder(a.term);
       if (upto != null && o > upto) return;
-      var abs = !!a.absent || a.score == null || a.score === '';
-      (by[a.course] = by[a.course] || []).push({
+      var abs = !!a.absent || a.score == null || a.score === '', code = al[a.course] || a.course;
+      (by[code] = by[code] || []).push({
         term: a.term, order: o, idx: i, score: abs ? null : +a.score, absent: abs, credits: +a.credits || 0
       });
     });
@@ -231,11 +250,12 @@
 
   /** Credit-weighted GPA of each term on its own (unofficial trend indicator). */
   function semesterGPAs(p) {
-    var ctx = makeCtx(p), by = {};
+    var ctx = makeCtx(p), by = {}, al = aliasMap(p);
     (p.attempts || []).forEach(function (a) {
-      if (ctx.cfg.excludeNonDegree && ctx.nonDeg[a.course]) return;
+      var code = al[a.course] || a.course;
+      if (ctx.cfg.excludeNonDegree && ctx.nonDeg[code]) return;
       var o = termOrder(a.term); if (!o) return;
-      (by[o] = by[o] || []).push(a);
+      (by[o] = by[o] || []).push(Object.assign({}, a, { course: code }));
     });
     return Object.keys(by).map(Number).sort(function (a, b) { return a - b; }).map(function (o) {
       var num = 0, den = 0;
@@ -629,7 +649,7 @@
     DEFAULT_CONFIG: DEFAULT_CONFIG, BAND: BAND, MONTH_NAMES: MONTH_NAMES,
     termOrder: termOrder, termInfo: termInfo, nextTerm: nextTerm, termsAhead: termsAhead, termLabelFromOrder: termLabelFromOrder,
     makeCtx: makeCtx, isReq: isReq, passMark: passMark, isPass: isPass, scoreToGPA: scoreToGPA, letter: letter,
-    gpaToPct: gpaToPct, pctToGpa: pctToGpa, bavarian: bavarian, germanClass: germanClass,
+    gpaToPct: gpaToPct, pctToGpa: pctToGpa, bavarian: bavarian, germanClass: germanClass, classify: classify, aliasMap: aliasMap, CLASS_BANDS: CLASS_BANDS,
     drag: drag, carryTypes: carryTypes, attemptTypes: attemptTypes, courseTerms: courseTerms,
     groupCourses: groupCourses, totals: totals, computeCGPA: computeCGPA, semesterGPAs: semesterGPAs,
     cumulativeTimeline: cumulativeTimeline, creditStatus: creditStatus, isPassedCourse: isPassedCourse,

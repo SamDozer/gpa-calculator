@@ -67,7 +67,7 @@
         if (isNaN(score) || score < 0 || score > 100) { errors.push('Line ' + line + ': score “' + sr + '” must be 0 to 100'); return; }
       }
       var cr = parseFloat(credits);
-      if (isNaN(cr) || cr <= 0) cr = defaults.credits && defaults.credits[course] ? defaults.credits[course] : NaN;
+      if (isNaN(cr) || cr < 0) cr = defaults.credits && defaults.credits[course] != null ? defaults.credits[course] : NaN;   // 0 is valid: 0-hour requirements are printed on records
       if (isNaN(cr)) { errors.push('Line ' + line + ': credits missing for ' + course); return; }
       rows.push({ term: String(term).trim(), course: course, credits: cr, score: abs ? null : score, absent: abs });
     }

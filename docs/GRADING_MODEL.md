@@ -73,6 +73,12 @@ German = 1 + 3 · (N_max − N_d) / (N_max − N_min)
 
 `N_max` = best GPA, `N_d` = yours, `N_min` = lowest passing GPA. `N_min` is contested (1.0 or 2.0); both are one field away. It is an estimate: uni-assist or the programme’s own conversion is the authority.
 
-## 5. Term GPA
+## 5. What the graduation statement prints
+
+The faculty’s statement classifies by: **Excellent** 3.5–5 (85–100%), **Very Good** 2.5–3.4 (75–84%), **Good** 1.5–2.4 (65–74%), **Pass** 1–1.4 (60–64%). The GPA appears with one decimal and the percentage as a whole number.
+
+Cross-check against an official academic record of a graduate who sat every course once (146 hours, all marks and points printed): hours × points ÷ hours = **3.4527**, which the statement prints as **3.5 / 85% / Excellent**. Conclusions: the model needs no extra term for students without repeats, the printed values are **rounded to nearest, not truncated** (truncating would give 3.4 and “Very Good”), and zero-hour requirements (Critical thinking, Entrepreneurship) are printed but do not count. The Projection tab shows this “as printed” view. The “with Honour” wording has additional criteria that are not modelled. This record has no repeated courses, so it does not constrain the repeat weights.
+
+## 6. Term GPA
 
 The per-term GPA shown in charts is the credit-weighted `g` of every attempt sat that term, including fails and absences, with no repeat drag. The university’s own term GPA definition may differ; it is a trend indicator only.

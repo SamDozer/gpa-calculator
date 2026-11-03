@@ -146,7 +146,7 @@ UI.Plan = (function () {
   }
   function canon(S, code) {
     code = code.trim(); var lc = code.toLowerCase(), hit = null;
-    S.degree.curriculum.forEach(function (c) { if (c.code.toLowerCase() === lc) hit = c.code; });
+    S.degree.curriculum.forEach(function (c) { if (c.code.toLowerCase() === lc || (c.aliases || []).some(function (a) { return a.toLowerCase() === lc; })) hit = c.code; });
     S.plan.forEach(function (c) { if (c.code.toLowerCase() === lc) hit = hit || c.code; });
     S.attempts.forEach(function (c) { if (c.course.toLowerCase() === lc) hit = hit || c.course; });
     return hit || code;

@@ -26,7 +26,8 @@ window.App = (function () {
     var S = D.S, now = D.tot.cgpa, fin = D.parts.cgpa, cs = D.cs, hasPlan = D.parts.items.length > 0 || D.parts.unallocated.credits > 0;
     var pct = cs.total ? Math.min(100, 100 * cs.earned / cs.total) : 0;
     var planned = D.parts.plannedCredits;
-    var srcNote = S.mode === 'quick' ? (D.S.attempts.length ? 'baseline + ' + D.S.attempts.length + ' new results' : 'from your baseline') : '≈ ' + UI.f(G.gpaToPct(now, S.config), 1) + '%';
+    var band = G.classify(now, S.config).band;
+    var srcNote = (S.mode === 'quick' ? (D.S.attempts.length ? 'baseline + ' + D.S.attempts.length + ' new results' : 'from your baseline') : '≈ ' + UI.f(G.gpaToPct(now, S.config), 1) + '%') + ' · ' + band;
     var k = [
       ['CGPA now', UI.f(now), (S.mode === 'quick' ? '≈ ' + UI.f(G.gpaToPct(now, S.config), 1) + '% · ' : '') + srcNote, ''],
       ['Projected graduating', hasPlan ? UI.f(fin) : '–', hasPlan ? UI.signed(fin - now) + ' at ' + S.ui.sn + '% new / ' + S.ui.sr + '% retake' : 'add a plan to project', fin >= S.ui.target ? 'green' : ''],

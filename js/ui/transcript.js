@@ -12,7 +12,7 @@ UI.Transcript = (function () {
       '<div class="cfg">' +
       '<label>Term (exam period)<input type="text" id="a_term" list="dl_terms" placeholder="Sep2026" style="width:110px" autocomplete="off" title="Jan = Term 1 exams (Dec/Jan), May = Term 2 exams (late May/Jun), Sep = Summer exams (Aug/Sep). Dec, Jun and Aug are accepted too."></label>' +
       '<label>Course code<input type="text" id="a_course" list="dl_courses" placeholder="BTC323" style="width:130px" autocomplete="off"></label>' +
-      '<label>Credits<input type="number" id="a_cr" value="3" min="0.5" step="0.5" style="width:80px"></label>' +
+      '<label>Credits<input type="number" id="a_cr" value="3" min="0" step="0.5" style="width:80px"></label>' +
       '<label>Score %<input type="number" id="a_score" min="0" max="100" placeholder="85" style="width:84px"></label>' +
       '<label class="check"><input type="checkbox" id="a_abs"> Absent (غ)</label>' +
       '<button class="btn primary" data-act="addAtt" style="margin-bottom:2px">Add result</button></div>' +
@@ -62,7 +62,7 @@ UI.Transcript = (function () {
 
   function canon(S, code) {
     code = code.trim(); var lc = code.toLowerCase(), hit = null;
-    S.degree.curriculum.forEach(function (c) { if (c.code.toLowerCase() === lc) hit = c.code; });
+    S.degree.curriculum.forEach(function (c) { if (c.code.toLowerCase() === lc || (c.aliases || []).some(function (a) { return a.toLowerCase() === lc; })) hit = c.code; });
     if (!hit) S.plan.forEach(function (c) { if (c.code.toLowerCase() === lc) hit = c.code; });
     if (!hit) S.attempts.forEach(function (c) { if (c.course.toLowerCase() === lc) hit = c.course; });
     return hit || code;
@@ -95,7 +95,7 @@ UI.Transcript = (function () {
       abs = UI.$('#a_abs', el).checked, raw = UI.$('#a_score', el).value.trim(), score = abs || raw === '' ? null : parseFloat(raw);
     if (!term || !code) return bad('Term and course code are required.');
     if (!G.termOrder(term)) return bad('Term not understood. Use e.g. Sep2026, Fall 2026 or مايو2026.');
-    if (!(cr > 0)) return bad('Credits must be a positive number.');
+    if (isNaN(cr) || cr < 0) return bad('Credits must be a number (0 for a 0-hour requirement).');
     if (score !== null && (isNaN(score) || score < 0 || score > 100)) return bad('Score must be between 0 and 100.');
     var dup = S.attempts.some(function (a) { return a.course === code && G.termOrder(a.term) === G.termOrder(term); });
     if (dup) return bad(code + ' already has a result in ' + term + '. Edit it in the table below instead.');

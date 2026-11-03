@@ -260,6 +260,27 @@ test('garbage files give a readable error', () => {
   assert.throws(() => IO.parseProfile('not json'), /not valid JSON/);
   assert.throws(() => IO.parseProfile('{"hello":1}'), /Not a GPA profile/);
 });
+test('graduation statement: GPA to 1 decimal and % to a whole number, rounded to nearest', () => {
+  const c = G.classify(3.4527);
+  assert.strictEqual(c.printedGPA, 3.5); assert.strictEqual(c.printedPct, 85); assert.strictEqual(c.band, 'Excellent');
+  assert.strictEqual(G.classify(3.44).band, 'Very Good'); assert.strictEqual(G.classify(2.45).band, 'Very Good');
+  assert.strictEqual(G.classify(1.5373).band, 'Good'); assert.strictEqual(G.classify(1.44).band, 'Pass');
+  assert.strictEqual(G.classify(0.9).band, 'Below pass');
+});
+test('alias codes count as the curriculum course (alternative electives, renamed codes)', () => {
+  const p = profile({ attempts: [att('Jan2025', 'ALT1', 2, 90), att('Jan2025', 'B', 2, 80)] });
+  p.degree.curriculum = [{ level: 1, code: 'MAIN', name: 'Elective', credits: 2, aliases: ['ALT1'] }, { level: 1, code: 'B', name: 'B', credits: 2 }];
+  p.degree.totalCredits = 4;
+  const tot = G.totals(p);
+  assert.ok(tot.byCode.MAIN && !tot.byCode.ALT1);
+  assert.strictEqual(G.creditStatus(p, tot).earned, 4);
+  Store.syncPlan(p); assert.strictEqual(p.plan.length, 0);
+});
+test('0-hour requirements import and never move the CGPA', () => {
+  const res = IO.parseAttempts('course,credits,term,score\nU110,0,May2022,79\nA,4,Jan2022,80');
+  assert.strictEqual(res.errors.length, 0); assert.strictEqual(res.rows[0].credits, 0);
+  const p = profile({ attempts: res.rows }); near(G.totals(p).cgpa, 3.0, 1e-9);
+});
 test('profile survives a JSON round trip', () => {
   const p = profile({ attempts: [att('Jan2023', 'A', 4, 80)] });
   const q = Store.normalize(JSON.parse(IO.toJSON(p)));
