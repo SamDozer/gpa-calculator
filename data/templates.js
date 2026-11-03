@@ -21,7 +21,7 @@ window.GPA_TEMPLATES = [
       [1, 'BTC111', 'General Chemistry I', 4], [1, 'BTBio111', 'Cell Biology', 4], [1, 'BTM111', 'Differential Calculus', 3],
       [1, 'BTPhy111', 'Physics I', 4], [1, 'BTU101', 'Computer Science', 2, 1], [1, 'BTU102', 'English language', 2, 1],
       [2, 'BTC122', 'General Chemistry II', 4], [2, 'BTBio122', 'Biodiversity', 4], [2, 'BTM122', 'Integral Calculus', 3],
-      [2, 'BTPhy122', 'Physics II', 4], [2, 'BTU103', 'Human Rights', 2, 1], [2, 'BTU108', 'Social Science elective', 2, 1, ['BTU104']],
+      [2, 'BTPhy122', 'Physics II', 4], [2, 'BTU103', 'Human Rights', 2, 1], [2, 'BTU108', 'Social Science elective', 2, 1, ['BTU104', 'BTU109']],
       [3, 'BTBio211', 'Genetics', 4], [3, 'BTC211', 'Organic Chemistry I', 4], [3, 'BTM211', 'Biostatistics', 3],
       [3, 'BTC212', 'Physical Chemistry I', 4], [3, 'BTC213', 'Inorganic Chemistry I', 4],
       [4, 'BTBio222', 'Molecular Biology', 5], [4, 'BTC224', 'Organic Chemistry II', 2], [4, 'BTC225', 'Physical Chemistry II', 4],

@@ -15,6 +15,7 @@ const near = (a, b, eps, msg) => assert.ok(Math.abs(a - b) <= (eps || 1e-9), (ms
 function profile(over) {
   const p = Store.blank({ mode: 'full' });
   p.baseline.enabled = false;
+  p.config.repeatMode = 'weighted';       // most tests below exercise the weighted rule explicitly; the default is covered separately
   return Object.assign(p, over || {});
 }
 const att = (term, course, credits, score) => ({ term, course, credits, score, absent: score == null });
@@ -28,9 +29,11 @@ test('score to GPA on the 0-5 scale', () => {
 });
 test('university requirements pass at 50', () => {
   const ctx = G.makeCtx(profile());
-  near(G.scoreToGPA(55, false, 'BTU101', ctx), 0.5);
+  near(G.scoreToGPA(55, false, 'BTU101', ctx), 1.0);   // passes in 50-59% print as 1.0 points (floor)
+  near(G.scoreToGPA(50, false, 'BTU101', ctx), 1.0);
+  near(G.scoreToGPA(49, false, 'BTU101', ctx), 0);
   near(G.scoreToGPA(55, false, 'SCI101', ctx), 0);
-  near(G.scoreToGPA(50, false, 'U110', ctx), 0);
+  near(G.scoreToGPA(50, false, 'U110', ctx), 1.0);
 });
 test('gpa <-> percent round trip and Bavarian endpoints', () => {
   const cfg = G.DEFAULT_CONFIG;
@@ -122,6 +125,7 @@ test('quick mode: closed form final = (N + Q) / D_final', () => {
 });
 test('quick mode: retake of a failed course adds only the repeat drag', () => {
   const p = Store.blank({ mode: 'quick', cgpa: 1.5, gpaHours: 50, earnedHours: 47, totalCredits: 60 });
+  p.config.repeatMode = 'weighted';
   p.carry.F1 = { failed: 1, absent: 0 };
   p.plan = [{ code: 'F1', credits: 3, expected: 70, active: true, term: 'Sep2026' }];
   p.ui.fill = false;
@@ -252,7 +256,7 @@ test('first hand-off transcript format converts to a profile with the same CGPA 
       { term: 'Jan2023', course: 'X', credits: 2, score: 90, absent: false }, { term: 'Jan2023', course: 'BTU1', credits: 2, score: 55, absent: false }],
     official_snapshots: [{ term: 'Jan2023', cgpa: 2.5 }], fitted_config: { w_failed: 0.96, w_absent: 1, decay: 0.04, repeat_mode: 'weighted', exclude_non_degree: true } };
   const p = Store.normalize(IO.parseProfile(JSON.stringify(legacy)));
-  near(G.totals(p).cgpa, (12 + 0 + 0.5 * 2) / (4 + 2 + 2), 1e-9);
+  near(G.totals(p).cgpa, (12 + 0 + 1.0 * 2) / (4 + 2 + 2), 1e-9);   // BTU1 passed at 55 -> 1.0 points
   assert.deepStrictEqual(p.plan.map(r => r.code), ['B']);
   assert.strictEqual(p.snapshots.length, 1);
 });
@@ -260,9 +264,9 @@ test('garbage files give a readable error', () => {
   assert.throws(() => IO.parseProfile('not json'), /not valid JSON/);
   assert.throws(() => IO.parseProfile('{"hello":1}'), /Not a GPA profile/);
 });
-test('graduation statement: GPA to 1 decimal and % to a whole number, rounded to nearest', () => {
+test('classification follows the GPA rounded to 1 decimal', () => {
   const c = G.classify(3.4527);
-  assert.strictEqual(c.printedGPA, 3.5); assert.strictEqual(c.printedPct, 85); assert.strictEqual(c.band, 'Excellent');
+  assert.strictEqual(c.rounded, 3.5); near(c.pct, 84.527, 1e-9); assert.strictEqual(c.band, 'Excellent');
   assert.strictEqual(G.classify(3.44).band, 'Very Good'); assert.strictEqual(G.classify(2.45).band, 'Very Good');
   assert.strictEqual(G.classify(1.5373).band, 'Good'); assert.strictEqual(G.classify(1.44).band, 'Pass');
   assert.strictEqual(G.classify(0.9).band, 'Below pass');
@@ -280,6 +284,26 @@ test('0-hour requirements import and never move the CGPA', () => {
   const res = IO.parseAttempts('course,credits,term,score\nU110,0,May2022,79\nA,4,Jan2022,80');
   assert.strictEqual(res.errors.length, 0); assert.strictEqual(res.rows[0].credits, 0);
   const p = profile({ attempts: res.rows }); near(G.totals(p).cgpa, 3.0, 1e-9);
+});
+test('default rule: one extra registration per repeated course, however many attempts', () => {
+  const p = Store.blank({ mode: 'full' }); p.baseline.enabled = false;
+  assert.strictEqual(p.config.repeatMode, 'count_one'); assert.strictEqual(p.config.passFloor, 1);
+  p.attempts = [att('Jan2023', 'X', 4, 40), att('May2023', 'X', 4, null), att('Sep2023', 'X', 4, 50), att('Jan2024', 'X', 4, 95), att('Jan2023', 'Y', 3, 80)];
+  const t = G.totals(p);
+  near(t.D, 4 * 2 + 3, 1e-9); near(t.N, 4 * 4.5 + 3 * 3, 1e-9);     // X counts twice (8), not four times
+});
+test('pass floor: a university requirement passed at 50-59% earns 1.0 points, subject courses fail below 60', () => {
+  const p = Store.blank({ mode: 'full' }); p.baseline.enabled = false;
+  p.attempts = [att('Jan2023', 'BTU103', 2, 57), att('Jan2023', 'SCI1', 2, 57)];
+  near(G.totals(p).N, 2 * 1.0 + 0, 1e-9);
+});
+test('profiles saved with the older fitted weights migrate to the one-extra-registration rule', () => {
+  const old = Store.blank({ mode: 'full' });
+  old.config = Object.assign({}, old.config, { repeatMode: 'weighted', wFailed: 0.96, wAbsent: 1, decay: 0.04 }); delete old.config.passFloor;
+  const q = Store.normalize(old);
+  assert.strictEqual(q.config.repeatMode, 'count_one'); assert.strictEqual(q.config.passFloor, 1); assert.strictEqual(q.meta.migrated, 'model5');
+  const custom = Store.blank({ mode: 'full' }); custom.config = Object.assign({}, custom.config, { repeatMode: 'weighted', wFailed: 0.9, decay: 0.1 }); delete custom.config.passFloor;
+  assert.strictEqual(Store.normalize(custom).config.repeatMode, 'weighted');   // a user's own weights are respected
 });
 test('profile survives a JSON round trip', () => {
   const p = profile({ attempts: [att('Jan2023', 'A', 4, 80)] });

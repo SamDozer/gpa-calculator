@@ -206,3 +206,25 @@ details>summary{cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:1
 .rel{position:relative}
 @media print{.hdr .tabs,.btn,.icon-btn,.seg{display:none!important}.card{box-shadow:none;break-inside:avoid}body{background:#fff}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}html{scroll-behavior:auto}}
+
+/* ---------- right-to-left (Egyptian Arabic) ---------- */
+html[dir="rtl"] body{font-family:'Cairo','Inter',system-ui,sans-serif;line-height:1.65}
+html[dir="rtl"] .mono,html[dir="rtl"] .btn,html[dir="rtl"] input,html[dir="rtl"] select,html[dir="rtl"] textarea,html[dir="rtl"] table,html[dir="rtl"] .kpi .k,html[dir="rtl"] .stat .k,html[dir="rtl"] .msg,html[dir="rtl"] .tag,html[dir="rtl"] .eyebrow{font-family:'Cairo','IBM Plex Mono',system-ui,sans-serif}
+html[dir="rtl"] th{text-align:right;letter-spacing:0;text-transform:none}
+html[dir="rtl"] .num{text-align:left}
+html[dir="rtl"] .kpi .k,html[dir="rtl"] .stat .k,html[dir="rtl"] .slider-lab,html[dir="rtl"] .cfg label,html[dir="rtl"] .field{letter-spacing:0;text-transform:none}
+html[dir="rtl"] .rec{border-left:0;border-right:3px solid var(--blue);border-radius:9px 0 0 9px}
+html[dir="rtl"] .rec.up{border-right-color:var(--green)}html[dir="rtl"] .rec.warn{border-right-color:var(--amber)}html[dir="rtl"] .rec.stop{border-right-color:var(--red)}
+html[dir="rtl"] .cc.ret{border-left:1px solid var(--line);border-right:3px solid var(--amber)}
+html[dir="rtl"] .cc.new{border-left:1px solid var(--line);border-right:3px solid var(--green)}
+html[dir="rtl"] .gauge .delta{margin-left:0;margin-right:9px}
+html[dir="rtl"] .tab .bdg{margin-left:0;margin-right:5px}
+html[dir="rtl"] .menu{right:auto;left:0}
+html[dir="rtl"] [style*="margin-left:auto"]{margin-left:0!important;margin-right:auto}
+html[dir="rtl"] .formula,html[dir="rtl"] .toast-box{direction:ltr}
+html[dir="rtl"] input[type=number],html[dir="rtl"] input[type=text],html[dir="rtl"] input[type=search]{text-align:start}
+html[dir="rtl"] .cfg input[type=number],html[dir="rtl"] table input[type=number]{direction:ltr;text-align:right}
+html[dir="rtl"] .cfg input[type=text],html[dir="rtl"] table input[type=text]{direction:ltr}
+html[dir="rtl"] details>summary{font-family:'Cairo',sans-serif}
+html[dir="rtl"] .hdr .who{letter-spacing:0}
+html[dir="rtl"] #btnLang{font-family:'Cairo',sans-serif;font-weight:600}

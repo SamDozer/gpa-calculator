@@ -8,7 +8,7 @@ UI.Projection = (function () {
     el = root;
     el.innerHTML =
       '<div class="card"><h2><span class="n">PROJ</span> Graduation predictor</h2>' +
-      '<p class="note">Set the scores you expect. Passing a course adds its credits to the denominator once; an earlier fail or absence stays in the denominator at almost full weight, which is why new courses move your CGPA far more than retakes. Per-course scores set on the Plan tab override these defaults.</p>' +
+      '<p class="note">Set the scores you expect. Passing a course adds its credits to the denominator once; a course you attempted before stays in the denominator one extra time (one extra registration), which is why new courses move your CGPA far more than retakes. Per-course scores set on the Plan tab override these defaults.</p>' +
       '<div class="grid2" style="gap:28px"><div>' +
       '<div class="btnrow" id="presetRow"><button class="btn" data-act="preset" data-p="cons">Conservative</button><button class="btn" data-act="preset" data-p="real">Realistic</button><button class="btn" data-act="preset" data-p="opt">Optimistic</button><button class="btn" data-act="preset" data-p="perf">Perfect</button><button class="btn" data-p="cust" disabled>Custom</button></div>' +
       '<div class="slider"><div class="slider-lab"><span id="sn_lab">NEW courses average</span><span class="val green" id="sn_v"></span></div><input type="range" min="50" max="100" data-path="ui.sn" data-type="num" id="r_sn" aria-label="Average score on new courses"></div>' +
@@ -26,7 +26,7 @@ UI.Projection = (function () {
       '<p class="note">An estimate for MSc applications. Nmin is the contested input: some universities use the lowest passing GPA, others the good-standing line. Try both. Uni-assist or the programme’s own table is the authority.</p>' +
       '<div class="cfg" style="margin-bottom:10px"><label>N max (best)<input type="number" step="0.1" data-path="config.germanMax" data-type="num"></label><label>N min (lowest pass)<input type="number" step="0.1" data-path="config.germanMin" data-type="num"></label></div>' +
       '<div class="tw"><table id="ger_tbl"><thead><tr><th>Source</th><th class="num">CGPA</th><th class="num">German</th><th>Class</th></tr></thead><tbody></tbody></table></div>' +
-      '<h3>As printed on a graduation statement</h3><p class="note" style="margin:0 0 8px">The statement shows the GPA to 1 decimal and the percentage as a whole number, rounded to nearest (never truncated): a record of 3.4527 was printed as 3.5 / 85% and classed Excellent. Bands: Excellent 3.5–5, Very Good 2.5–3.4, Good 1.5–2.4, Pass 1–1.4. Honours wording (“with Honour”) has extra criteria that are not modelled.</p>' +
+      '<h3>As printed on a graduation statement</h3><p class="note" style="margin:0 0 8px">The class follows the GPA rounded to 1 decimal (a record of 3.4527 was classed Excellent). Bands: Excellent 3.5–5, Very Good 2.5–3.4, Good 1.5–2.4, Pass 1–1.4. The printed number is usually exact (one record printed 1.838 / 68.38%), though a near-threshold value was printed rounded up (3.4527 as 3.5 / 85%). “With Honour” has extra criteria that are not modelled.</p>' +
       '<div class="tw"><table id="cls_tbl"><thead><tr><th>Source</th><th class="num">GPA</th><th class="num">%</th><th>Classification</th></tr></thead><tbody></tbody></table></div></div></div>' +
 
       '<div class="card"><h2><span class="n">SCEN</span> Scenarios</h2><p class="note">What your plan gives under different score levels (new courses / retakes).</p>' +
@@ -129,7 +129,7 @@ UI.Projection = (function () {
 
     UI.paint(UI.$('#cls_tbl tbody', el), gr.map(function (r) {
       var c2 = G.classify(r[1], cfg);
-      return '<tr><td>' + r[0] + '</td><td class="num">' + c2.printedGPA.toFixed(1) + '</td><td class="num">' + c2.printedPct + '%</td><td><span class="tag ' + (c2.band === 'Excellent' || c2.band === 'Very Good' ? 'ok' : c2.band === 'Below pass' ? 'bad' : 'warn') + '">' + c2.band + (c2.range ? ' · ' + c2.range : '') + '</span></td></tr>';
+      return '<tr><td>' + r[0] + '</td><td class="num">' + UI.f(r[1]) + '</td><td class="num">' + UI.f(c2.pct, 2) + '%</td><td><span class="tag ' + (c2.band === 'Excellent' || c2.band === 'Very Good' ? 'ok' : c2.band === 'Below pass' ? 'bad' : 'warn') + '">' + c2.band + (c2.range ? ' · ' + c2.range : '') + '</span></td></tr>';
     }).join(''));
 
     /* scenarios */

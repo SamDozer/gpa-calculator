@@ -2,7 +2,7 @@
 UI.Settings = (function () {
   'use strict';
   var G = window.GPA, el = null, fitRes = null, looRes = null;
-  var MODES = [['weighted', 'Weighted (fitted): earlier fails keep ~full weight, later ones decay'], ['count_one', 'Count one extra registration'], ['full', 'Replace (textbook): only the latest attempt counts'], ['capped', 'Capped: retake grade limited to a maximum']];
+  var MODES = [['count_one', 'One extra registration per repeated course (matches official records)'], ['weighted', 'Weighted: earlier fails keep ~full weight, later ones decay (older fit)'], ['full', 'Replace (textbook): only the latest attempt counts'], ['capped', 'Capped: retake grade limited to a maximum']];
 
   function mount(root) {
     el = root;
@@ -26,12 +26,12 @@ UI.Settings = (function () {
       '<div class="card"><h2><span class="n">CFG</span> Grading rules</h2>' +
       '<p class="note">Defaults match the Cairo University Faculty of Science credit-hour system. Every number is editable if your faculty differs.</p>' +
       '<div class="cfg"><label>Pass mark<input type="number" data-path="config.subjectPass" data-type="num"></label><label>University-req. pass<input type="number" data-path="config.requirementPass" data-type="num"></label>' +
-      '<label>Score offset<input type="number" data-path="config.gpaOffset" data-type="num"></label><label>Score divisor<input type="number" data-path="config.gpaDivisor" data-type="num"></label><label>Max GPA<input type="number" step="0.5" data-path="config.maxGPA" data-type="num"></label>' +
+      '<label>Score offset<input type="number" data-path="config.gpaOffset" data-type="num"></label><label>Score divisor<input type="number" data-path="config.gpaDivisor" data-type="num"></label><label>Minimum points for a pass<input type="number" step="0.1" data-path="config.passFloor" data-type="num" title="A university requirement passed at 50-59% prints as 1.0 points, not 0.5-0.9"></label><label>Max GPA<input type="number" step="0.5" data-path="config.maxGPA" data-type="num"></label>' +
       '<label class="check"><input type="checkbox" data-path="config.excludeNonDegree" data-type="bool"> exclude non-degree courses from CGPA</label></div>' +
       '<div class="cfg" style="margin-top:12px"><label>Repeat-course rule<select data-path="config.repeatMode" data-type="str" style="max-width:360px">' + MODES.map(function (m) { return '<option value="' + m[0] + '">' + m[1] + '</option>'; }).join('') + '</select></label>' +
       '<label>Failed-exam weight<input type="number" step="0.005" data-path="config.wFailed" data-type="num"></label><label>Absence weight<input type="number" step="0.005" data-path="config.wAbsent" data-type="num"></label><label>Decay per repeat<input type="number" step="0.005" data-path="config.decay" data-type="num"></label><label>Retake grade cap<input type="number" step="0.1" data-path="config.repeatCap" data-type="num"></label>' +
       '<button class="btn" data-act="resetCfg" style="margin-bottom:2px">Reset to Cairo defaults</button></div>' +
-      '<p class="note" style="margin-top:12px">GPA = score &lt; pass ? 0 : min((score − offset) ÷ divisor, max). Under the weighted rule the k-th earlier attempt of a course adds <b>weight × decay<sup>k</sup></b> × credits to the denominator, so the <b>first</b> failure costs almost one full registration and later failures add very little. Only the latest attempt earns points. Non-degree courses (below) never count.</p>' +
+      '<p class="note" style="margin-top:12px">GPA = score &lt; pass ? 0 : max(passFloor, min((score − offset) ÷ divisor, max)). Under the default rule a course you attempted before adds <b>one extra registration</b> (its credits once more) to the denominator, however many earlier attempts it had; only the latest attempt earns points. Non-degree courses (below) never count.</p>' +
       '<details style="margin-top:8px"><summary>▸ Score ↔ GPA table</summary><div class="tw" style="margin-top:8px"><table id="conv_tbl"><thead><tr><th>Score %</th><th class="num">GPA</th><th>Letter</th></tr></thead><tbody></tbody></table></div></details></div>' +
 
       '<div class="card" id="cal_card"><h2><span class="n">FIT</span> Calibration against your official CGPAs</h2>' +

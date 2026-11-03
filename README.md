@@ -8,7 +8,7 @@ A free, private GPA calculator and semester planner for **credit-hour programmes
 
 ## What it does
 
-- **Knows your CGPA exactly**, including the part most calculators get wrong: how a *failed or missed* attempt keeps weighing on your CGPA even after you retake and pass the course (see [the grading model](docs/GRADING_MODEL.md)).
+- **Knows your CGPA exactly**, including the part most calculators get wrong: a course you failed or missed stays in the denominator one extra time even after you retake and pass it. The rule reproduces five official CGPAs within rounding and a second student’s final CGPA ([evidence](docs/GRADING_MODEL.md)).
 - **Plans next semester.** The Semester calculator (top of the Plan tab) takes the courses you are taking and the score you expect in each, and shows the semester GPA, your new CGPA, and what each course does to it.
 - **Speaks the faculty calendar.** Terms are named by exam period: Jan (or Dec) = Term 1, May (or Jun) = Term 2, Sep (or Aug) = summer exams, with the academic year shown (see Settings → Term calendar).
 - **Answers “what do I need?”** The target calculator tells you the average you need to reach a CGPA, warns when a target is impossible, and shows which courses are worth the most effort and which failures cost the most.
@@ -77,7 +77,7 @@ Common features in the calculators students use (target-GPA solvers, impossible-
 ## FAQ
 
 **How is CGPA calculated at Cairo University Faculty of Science when a course is retaken?**
-Only the latest attempt earns points, but the first failed or missed attempt stays in the denominator at about one full registration (0.96 for a failed exam, 1.00 for an absence), and each further attempt adds about 4% of that. Details and evidence: [docs/GRADING_MODEL.md](docs/GRADING_MODEL.md). It is a fitted model, not a published regulation, and the app can re-fit it to your official CGPAs.
+Only the latest attempt earns points, and a course that was attempted before stays in the denominator **one extra time** (one extra registration), however many earlier attempts it had. Passes also never earn less than 1.0 grade points (a university requirement passed at 50–59% prints as 1.0). Details and evidence: [docs/GRADING_MODEL.md](docs/GRADING_MODEL.md). It is an inferred model, not a published regulation, and the app can check it against your official CGPAs.
 
 **How do I calculate my GPA if I only know my current CGPA and hours?**
 Use *Quick start*: enter CGPA, hours counted in it, hours passed and the hours needed to graduate, then add next semester’s courses in the Semester calculator.
@@ -100,7 +100,7 @@ GPA calculator, CGPA calculator, Cairo University GPA, Faculty of Science GPA, c
 
 ## Disclaimer
 
-Estimates only. Not an official document. The repeat-course rule is **reverse-engineered** from published CGPAs, not a university regulation; confirm anything important with your faculty’s student affairs office. “Good standing” and graduation thresholds are the faculty’s to define.
+Estimates only. Not an official document. The repeat-course rule is **inferred** from official CGPAs (and cross-checked on a second record), not a university regulation; confirm anything important with your faculty’s student affairs office. “Good standing” and graduation thresholds are the faculty’s to define.
 
 ## License
 

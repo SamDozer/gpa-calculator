@@ -139,6 +139,7 @@ window.App = (function () {
     });
     window.addEventListener('hashchange', function () { var id = location.hash.slice(1); if (Store.get() && id && id !== current) go(id); });
     if (!S) showWelcome(); else showApp(location.hash.slice(1) || null);
+    window.I18N && I18N.start();
   }
 
   return { boot: boot, go: go, refresh: refresh, showApp: showApp, showWelcome: showWelcome, get D() { return D; } };

@@ -40,6 +40,12 @@
     o.carry = p.carry || {}; o.attempts = p.attempts || []; o.plan = p.plan || []; o.snapshots = p.snapshots || [];
     o.meta = Object.assign({}, b.meta, p.meta || {});
     o.mode = p.mode || (o.baseline.enabled ? 'quick' : 'full');
+    // Profiles saved before the improved model: floor passes at 1.0 and move the old fitted weights to "one extra registration".
+    if (p.config && p.config.passFloor === undefined) {
+      o.config.passFloor = 1.0;
+      var c = p.config;
+      if (c.repeatMode === 'weighted' && c.wFailed === 0.96 && c.wAbsent === 1 && c.decay === 0.04) { o.config.repeatMode = 'count_one'; o.meta.migrated = 'model5'; }
+    }
     return o;
   }
 

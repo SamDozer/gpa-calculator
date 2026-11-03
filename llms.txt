@@ -15,8 +15,9 @@ Source: https://github.com/SamDozer/gpa-calculator
 
 ## Key facts about the grading model
 - Points = (score - 50) / 10, capped at 5; pass mark 60% (50% for university requirements). 85-100% Excellent, 75-84% Very Good, 65-74% Good, 60-64% Pass.
-- CGPA = sum(credits x points of latest attempt) / sum(credits x (1 + repeat drag)). Repeat drag: first failed attempt about 0.96 of a registration (absence 1.00), each later attempt about 4% of the previous weight.
-- The repeat-course rule is reverse-engineered from official CGPAs (error about 0.0006), not a published regulation. The graduation statement prints GPA with 1 decimal and percentage as a whole number, rounded to nearest.
+- A pass is never worth less than 1.0 points (a university requirement passed at 50-59% prints as 1.0). Courses printed with 0 hours do not count.
+- CGPA = sum(credits x points of latest attempt) / sum(credits x (1 + 1 if the course was attempted before)): one extra registration per repeated course, however many attempts.
+- This rule reproduces five official CGPAs of one student within rounding (RMSE 0.00028, no fitted parameters) and a second student's official 1.838 (model 1.8377); it is inferred, not a published regulation. The class follows the GPA rounded to 1 decimal.
 
 ## Docs
 - README (English): https://github.com/SamDozer/gpa-calculator/blob/main/README.md

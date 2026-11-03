@@ -4,9 +4,11 @@
 
    Model (credit-hour 0-5 scale, Cairo University Faculty of Science):
      g(score)  = 0 if absent or score < pass mark, else min((score-offset)/divisor, max)
+     g floor   = a passed course never earns less than passFloor (1.0) points: university requirements
+                 passed at 50-59% print as 1.0, not 0.5-0.9
      CGPA      = sum_c cr_c * g(latest_c)  /  sum_c cr_c * (1 + drag_c)
-     drag_c    = sum_k w(p_k) * decay^k       (k = 0 is the oldest earlier attempt)
-     w         = wFailed for a failed exam, wAbsent for an absence
+     drag_c    = 1 if the course was attempted before (one extra registration, however many times)   [default]
+                 or sum_k w(p_k) * decay^k   (the older "weighted" fit; kept for comparison)
 
    A "profile" is a plain JSON object (see store.js):
      config, degree{totalCredits,curriculum[],nonDegree[]}, baseline{enabled,cgpa,
@@ -23,8 +25,9 @@
     maxGPA: 5, gpaOffset: 50, gpaDivisor: 10,
     subjectPass: 60, requirementPass: 50,
     letters: [85, 75, 65],                 // A, B, C lower bounds (display only)
-    repeatMode: 'weighted',                // weighted | full | capped | count_one
-    wFailed: 0.96, wAbsent: 1.0, decay: 0.04, repeatCap: 3.3,
+    passFloor: 1.0,                        // minimum points for any pass
+    repeatMode: 'count_one',               // count_one (default) | weighted | full | capped
+    wFailed: 0.96, wAbsent: 1.0, decay: 0.04, repeatCap: 3.3,   // used by the "weighted" mode only
     excludeNonDegree: true,
     terms: ['Jan', 'May', 'Sep'],          // term names in a year, in order
     germanMax: 5, germanMin: 1
@@ -125,7 +128,7 @@
   function scoreToGPA(score, absent, code, ctx) {
     if (absent || score == null || score < passMark(code, ctx)) return 0;
     var c = ctx.cfg;
-    return Math.min((score - c.gpaOffset) / c.gpaDivisor, c.maxGPA);
+    return Math.min(Math.max((score - c.gpaOffset) / c.gpaDivisor, c.passFloor || 0), c.maxGPA);
   }
   function letter(score, absent, code, ctx) {
     if (absent || score == null) return 'AB';
@@ -145,15 +148,15 @@
   /**
    * Degree classification as the faculty prints it on a graduation statement:
    *   Excellent 3.5-5 (85-100%), Very Good 2.5-3.4 (75-84%), Good 1.5-2.4 (65-74%), Pass 1-1.4 (60-64%).
-   * The printed GPA has 1 decimal and the percentage is a whole number, both rounded to nearest, never truncated:
-   * a record of 3.4527 (84.53%) was printed as 3.5 / 85% / Excellent.
+   * The band follows the GPA rounded to 1 decimal: a record of 3.4527 was classed Excellent. The printed number is
+   * not always rounded: that same record printed 3.5 / 85%, but another printed its exact 1.838 / 68.38%.
    */
   var CLASS_BANDS = [[3.5, 'Excellent', '85–100%'], [2.5, 'Very Good', '75–84%'], [1.5, 'Good', '65–74%'], [1.0, 'Pass', '60–64%']];
   function classify(cgpa, cfg) {
     cfg = cfg || DEFAULT_CONFIG;
     var r1 = Math.round(cgpa * 10 + 1e-9) / 10, band = null;
     for (var i = 0; i < CLASS_BANDS.length; i++) if (r1 >= CLASS_BANDS[i][0] - 1e-9) { band = CLASS_BANDS[i]; break; }
-    return { printedGPA: r1, printedPct: Math.round(cgpa * cfg.gpaDivisor + cfg.gpaOffset), band: band ? band[1] : 'Below pass', range: band ? band[2] : '' };
+    return { rounded: r1, pct: cgpa * cfg.gpaDivisor + cfg.gpaOffset, band: band ? band[1] : 'Below pass', range: band ? band[2] : '' };
   }
   function germanClass(x) {
     if (x == null) return ['n/a', ''];
@@ -576,6 +579,8 @@
     var cur = p.config, models = [
       { name: 'Replace (textbook)', cfg: { repeatMode: 'full' } },
       { name: 'Count one extra registration', cfg: { repeatMode: 'count_one' } },
+      { name: 'Count one, but no 1.0 floor on passes', cfg: { repeatMode: 'count_one', passFloor: 0 } },
+      { name: 'Weighted (older fit: 0.96 / 1.00 / 0.04)', cfg: { repeatMode: 'weighted', wFailed: 0.96, wAbsent: 1, decay: 0.04 } },
       { name: 'Your current settings', cfg: {} }
     ];
     if (best) models.push({ name: 'Best fit to your snapshots', cfg: { repeatMode: 'weighted', wFailed: best.wFailed, wAbsent: best.wAbsent, decay: best.decay } });
@@ -611,7 +616,7 @@
     if (!active.length && st.remaining > 0)
       out.push(['warn', '+', '<b>Nothing planned yet.</b> ' + st.remaining + ' credits are still needed for graduation. Add this term’s courses in the Plan tab to see where your CGPA lands.']);
     if (retCr >= thr && cfg.repeatMode !== 'full')
-      out.push(['warn', '↺', '<b>Prioritise new courses.</b> You carry ' + retCr + ' cr of retakes vs ' + newCr + ' cr of new courses. Under the “' + cfg.repeatMode + '” repeat rule a retake barely lifts CGPA. Pass them (they block graduation) and put the effort into the new credits.']);
+      out.push(['warn', '↺', '<b>Prioritise new courses.</b> You carry ' + retCr + ' cr of retakes vs ' + newCr + ' cr of new courses. A retake costs its extra registration once and can only add its own grade points, so it lifts CGPA far less than a new course. Pass them (they block graduation) and put the effort into the new credits.']);
     if (sems.length >= 3) {
       var l3 = sems.slice(-3), improving = l3[2].gpa > l3[0].gpa;
       if (improving) out.push(['up', '↗', '<b>Upward trend.</b> Your last three term GPAs (' + l3.map(function (x) { return x.gpa.toFixed(2); }).join(' → ') + ') are rising. Worth foregrounding in applications.']);
