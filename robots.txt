@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://samdozer.github.io/gpa-calculator/sitemap.xml

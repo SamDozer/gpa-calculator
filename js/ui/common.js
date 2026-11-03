@@ -115,7 +115,7 @@ window.UI = (function () {
   }
 
   /* ------------------------------------------------ charts */
-  var charts = {};
+  var charts = {}, chartWarned = false;
   function chartTheme() {
     if (!window.Chart) return;
     var c = colors();
@@ -124,7 +124,8 @@ window.UI = (function () {
   }
   function chart(id, type, data, options) {
     var el = document.getElementById(id);
-    if (!el || !window.Chart) return null;
+    if (!window.Chart) { if (!chartWarned) { chartWarned = true; toast('Charts could not load (offline?). Everything else still works.', 'err'); } return null; }
+    if (!el) return null;
     chartTheme();
     var c = charts[id];
     if (c && c.canvas === el) { c.data = data; c.options = options; c.update('none'); return c; }

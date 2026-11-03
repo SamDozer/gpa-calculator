@@ -1,5 +1,7 @@
 # GPA Planner for Science Students
 
+**English** · [بالعربي (مصري)](README.ar.md) · [Live site](https://samdozer.github.io/gpa-calculator/)
+
 A free, private GPA calculator and semester planner for **credit-hour programmes on a 0–5 scale** (built for the Cairo University Faculty of Science, adjustable for others). It runs entirely in your browser: no account, no server, no tracking. Your grades never leave your device.
 
 **Use it:** open the GitHub Pages site of this repository, or download the repo and double-click `index.html`.
@@ -71,6 +73,30 @@ docs/               grading model write-up
 ## How this compares to other GPA calculators
 
 Common features in the calculators students use (target-GPA solvers, impossible-target warnings, what-if semesters, replace-vs-average retake policies, client-side privacy) are all here. What is different: the repeat-course penalty is modelled the way this registrar appears to count it, and the model can be **checked and re-fitted against your own official CGPAs** instead of being taken on faith.
+
+## FAQ
+
+**How is CGPA calculated at Cairo University Faculty of Science when a course is retaken?**
+Only the latest attempt earns points, but the first failed or missed attempt stays in the denominator at about one full registration (0.96 for a failed exam, 1.00 for an absence), and each further attempt adds about 4% of that. Details and evidence: [docs/GRADING_MODEL.md](docs/GRADING_MODEL.md). It is a fitted model, not a published regulation, and the app can re-fit it to your official CGPAs.
+
+**How do I calculate my GPA if I only know my current CGPA and hours?**
+Use *Quick start*: enter CGPA, hours counted in it, hours passed and the hours needed to graduate, then add next semester’s courses in the Semester calculator.
+
+**What do I need to score to reach a target CGPA?**
+The target calculator on the Projection tab solves for the average across your planned courses and tells you when the target is impossible.
+
+**What scale and grade conversion does it use?**
+0–5 credit-hour scale: points = (score − 50) ÷ 10, pass mark 60% (50% for university requirements), 85–100% Excellent, 75–84% Very Good, 65–74% Good, 60–64% Pass. All editable.
+
+**Does it send my grades anywhere?**
+No. There is no server; data stays in your browser’s local storage.
+
+**Can I use it for another university or a different degree total?**
+Yes: grading numbers and the degree total are editable, and you can paste your own course list. Contribute a template via [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Keywords
+
+GPA calculator, CGPA calculator, Cairo University GPA, Faculty of Science GPA, credit hour system, 0–5 GPA scale, retake / repeat course GPA, semester planner, target GPA calculator, Modified Bavarian formula, German grade conversion, حاسبة المعدل التراكمي, كلية العلوم جامعة القاهرة, نظام الساعات المعتمدة.
 
 ## Disclaimer
 

@@ -3,8 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GPA Planner for Science Students</title>
-<meta name="description" content="Free, private GPA planner for credit-hour (0-5) science programmes. Track your CGPA, plan next semester, and see what you need to hit a target. Runs in your browser; nothing is uploaded.">
+<title>GPA Calculator &amp; Semester Planner: Cairo University Faculty of Science (0–5 credit-hour CGPA)</title>
+<meta name="description" content="Free, private CGPA calculator and semester planner for credit-hour (0–5 scale) science programmes, built for Cairo University Faculty of Science. Handles failed and retaken courses, target-GPA solver, German grade estimate. Runs in your browser; nothing is uploaded. حاسبة المعدل التراكمي لكلية العلوم جامعة القاهرة.">
+<meta name="keywords" content="GPA calculator, CGPA calculator, Cairo University, Faculty of Science, credit hour system, retake GPA, repeat course GPA, semester planner, target GPA, Modified Bavarian formula, حاسبة المعدل التراكمي, كلية العلوم جامعة القاهرة, نظام الساعات المعتمدة">
+<link rel="canonical" href="https://samdozer.github.io/gpa-calculator/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="GPA Planner for Cairo University Faculty of Science">
+<meta property="og:description" content="Know your CGPA, plan next semester, see what you need to hit a target. Handles retakes. Free, open source, private: runs in your browser.">
+<meta property="og:url" content="https://samdozer.github.io/gpa-calculator/">
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#12A37A">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"GPA Planner for Science Students","alternateName":"حاسبة المعدل التراكمي لكلية العلوم","applicationCategory":"EducationalApplication","operatingSystem":"Any (web browser)","url":"https://samdozer.github.io/gpa-calculator/","codeRepository":"https://github.com/SamDozer/gpa-calculator","license":"https://opensource.org/licenses/MIT","isAccessibleForFree":true,"inLanguage":["en","ar"],"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"Free, private CGPA calculator and semester planner for credit-hour (0-5) programmes at Cairo University Faculty of Science. Models failed and retaken courses, solves for the average needed to reach a target CGPA, simulates risk and estimates the German grade. All data stays in the browser."}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -12,6 +23,12 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 </head>
 <body>
+<noscript><div style="max-width:720px;margin:24px auto;padding:0 16px;font-family:system-ui,sans-serif;line-height:1.55">
+<h1>GPA Planner for Science Students</h1>
+<p>A free, private CGPA calculator and semester planner for credit-hour programmes on a 0–5 scale, built for Cairo University Faculty of Science. It needs JavaScript. It calculates your CGPA including failed and retaken courses, plans next semester, solves for the average needed to reach a target CGPA, and estimates the German grade. Nothing is uploaded: everything runs in your browser.</p>
+<p><a href="https://github.com/SamDozer/gpa-calculator">Source code and documentation</a> · <a href="https://github.com/SamDozer/gpa-calculator/blob/main/README.ar.md">شرح بالعربي (مصري)</a> · <a href="https://github.com/SamDozer/gpa-calculator/blob/main/docs/GRADING_MODEL.md">How the grading model works</a></p>
+<p dir="rtl">حاسبة معدل تراكمي مجانية وخاصة لطلبة كلية العلوم جامعة القاهرة بنظام الساعات المعتمدة، بتحسب المعدل مع الرسوب والإعادة وبتخططلك الترم الجاي. بتشتغل على المتصفح بس.</p>
+</div></noscript>
 <div id="app">
   <header class="hdr" id="hdr" hidden>
     <div class="hdr-in">
@@ -34,6 +51,7 @@
   <div class="wrap">
     <main id="view"></main>
     <p class="foot" id="foot"></p>
+    <p class="foot" id="about">Free and open source (MIT) · <a href="https://github.com/SamDozer/gpa-calculator" target="_blank" rel="noopener">GitHub</a> · <a href="https://github.com/SamDozer/gpa-calculator/blob/main/README.ar.md" target="_blank" rel="noopener">شرح بالعربي</a> · <a href="https://github.com/SamDozer/gpa-calculator/blob/main/docs/GRADING_MODEL.md" target="_blank" rel="noopener">How the model works</a> · <a href="https://github.com/SamDozer/gpa-calculator/issues" target="_blank" rel="noopener">Report an issue</a></p>
   </div>
 </div>
 <div class="toast-box" id="toasts" aria-live="polite"></div>

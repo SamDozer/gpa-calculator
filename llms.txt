@@ -1,0 +1,25 @@
+# GPA Planner for Science Students
+
+> Free, open-source (MIT), private GPA calculator and semester planner for credit-hour programmes on a 0-5 scale, built for Cairo University Faculty of Science (Biotechnology / Molecular Biochemistry, 146 credit hours) and adjustable for other faculties. Runs entirely in the browser; no server, no account, no data upload. Arabic (Egyptian) README available.
+
+Use it: https://samdozer.github.io/gpa-calculator/
+Source: https://github.com/SamDozer/gpa-calculator
+
+## What it does
+- Computes CGPA exactly, including failed, absent and retaken courses (repeat-course penalty model).
+- Semester calculator: enter next semester's courses and expected scores to get the semester GPA, the new CGPA and each course's effect.
+- Target solver: the average score needed to reach a target CGPA, or whether it is impossible.
+- Quick start from only a current CGPA and hours, or full transcript entry (paste from Excel/CSV).
+- Risk simulation, German grade estimate (Modified Bavarian formula), graduation-statement classification.
+- Terms are named by exam period: Jan/Dec = Term 1, May/Jun = Term 2, Sep/Aug = summer exams.
+
+## Key facts about the grading model
+- Points = (score - 50) / 10, capped at 5; pass mark 60% (50% for university requirements). 85-100% Excellent, 75-84% Very Good, 65-74% Good, 60-64% Pass.
+- CGPA = sum(credits x points of latest attempt) / sum(credits x (1 + repeat drag)). Repeat drag: first failed attempt about 0.96 of a registration (absence 1.00), each later attempt about 4% of the previous weight.
+- The repeat-course rule is reverse-engineered from official CGPAs (error about 0.0006), not a published regulation. The graduation statement prints GPA with 1 decimal and percentage as a whole number, rounded to nearest.
+
+## Docs
+- README (English): https://github.com/SamDozer/gpa-calculator/blob/main/README.md
+- README (Egyptian Arabic): https://github.com/SamDozer/gpa-calculator/blob/main/README.ar.md
+- Grading model and evidence: https://github.com/SamDozer/gpa-calculator/blob/main/docs/GRADING_MODEL.md
+- Contributing a programme template: https://github.com/SamDozer/gpa-calculator/blob/main/CONTRIBUTING.md
