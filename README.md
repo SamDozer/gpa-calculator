@@ -74,6 +74,20 @@ docs/               grading model write-up
 
 Common features in the calculators students use (target-GPA solvers, impossible-target warnings, what-if semesters, replace-vs-average retake policies, client-side privacy) are all here. What is different: the repeat-course penalty is modelled the way this registrar appears to count it, and the model can be **checked and re-fitted against your own official CGPAs** instead of being taken on faith.
 
+## How accurate is it?
+
+The grading rule (pass floored at 1.0 points; a course attempted before counts one extra time in the denominator) has **no fitted parameters**, so every official number below is a genuine prediction, not something it was tuned to:
+
+| Test | Official | Model | Error |
+|---|---|---|---|
+| Student A, CGPA after 5 different terms (records with failures, absences, a course taken 5 times) | 1.077 · 1.193 · 1.363 · 1.584 · 1.537 | 1.0772 · 1.1933 · 1.3632 · 1.5837 · 1.5374 | all within ±0.0004 |
+| Student B, graduated, five courses failed once (16 h) | 1.838 / 68.38% | 1.8377 / 68.38% | −0.0003 |
+| Student C, graduated, no repeats | 3.5 / 85% (Excellent) | 3.4527 → Excellent | class matches |
+
+The university prints CGPAs to 3 decimals, so ±0.0005 is the best any model can do: **every repeat-affected value lands inside that band.** Rival rules fail the same data: textbook replacement is off by up to 0.5, “only failed exams count” by 0.13, “every attempt counts fully” by 0.09, and the older fitted weights miss the rounding band on 3 of 5 values.
+
+Limits, stated honestly: it is three students from one programme (Biotechnology / Molecular Biochemistry, Cairo University Faculty of Science), and the rule is inferred, not published. A projection is only as good as the scores you expect. If your official numbers disagree, use **Settings → Calibration** and please [open an issue](https://github.com/SamDozer/gpa-calculator/issues).
+
 ## FAQ
 
 **How is CGPA calculated at Cairo University Faculty of Science when a course is retaken?**

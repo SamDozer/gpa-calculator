@@ -47,7 +47,7 @@ The university does not publish the formula, so it was inferred from official nu
 - **Do not infer retakes from dates.** On that record a later registration date did *not* reliably mean a retake: two courses registered later than their normal term had never been failed, and one failed course showed its normal date. The app therefore never guesses: you mark retakes yourself (or they come from your logged attempts).
 - A third record with no repeats (all courses sat once in their normal terms) gives exactly Σ hours × points ÷ 146.
 
-**Confidence.** High: only the latest attempt earns points, a repeated course costs one extra registration, passes are floored at 1.0. Open: whether absences differ from fails (no evidence so far), and whether a third or later attempt adds anything (none seen). **Settings → Calibration** lets you type your own official CGPAs, see the per-term error and re-fit if your record disagrees.
+**Confidence.** High: only the latest attempt earns points, a repeated course costs one extra registration, passes are floored at 1.0. Also supported: absences count exactly like fails (a rule where only failed exams add a registration misses the first student’s values by 0.13), and third or later attempts add nothing (one course with five attempts fits with a single extra registration). Open: other programmes and faculties. **Settings → Calibration** lets you type your own official CGPAs, see the per-term error and re-fit if your record disagrees.
 
 ## 3. Projection
 
