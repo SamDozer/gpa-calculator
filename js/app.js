@@ -10,6 +10,7 @@ window.App = (function () {
     { id: 'plan', label: 'Plan', mod: function () { return UI.Plan; } },
     { id: 'projection', label: 'Projection', mod: function () { return UI.Projection; } },
     { id: 'analytics', label: 'Analytics', mod: function () { return UI.Analytics; } },
+    { id: 'calc', label: 'Quick calc', mod: function () { return { mount: function (root, D) { UI.QuickCalc.mount(root, { prefill: { cgpa: D.tot.cgpa, hours: D.tot.D } }); }, fill: function () {} }; } },
     { id: 'settings', label: 'Settings', mod: function () { return UI.Settings; } }
   ];
 

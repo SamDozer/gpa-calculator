@@ -16,6 +16,7 @@ UI.Welcome = (function () {
       '<div class="modes">' +
       '<button class="mode" data-act="quick"><span class="ic">⚡</span><h3>Quick start</h3><p>You know your current CGPA and finished hours, and don’t want to type old courses. Start planning this or next semester in under a minute.</p><span class="go">I know my CGPA &amp; hours →</span></button>' +
       '<button class="mode" data-act="full"><span class="ic">📋</span><h3>Full transcript</h3><p>Enter every course attempt to get the exact CGPA, term-by-term charts, repeat penalties, and a degree map. Paste from Excel works.</p><span class="go">I’ll enter my courses →</span></button>' +
+      '<button class="mode" data-act="calc"><span class="ic">🧮</span><h3>Just calculate</h3><p>No setup and no course names. Type your CGPA and finished hours, then this semester’s hours and expected scores, and see your new CGPA.</p><span class="go">Open the quick calculator →</span></button>' +
       '<button class="mode" data-act="demo"><span class="ic">🧪</span><h3>Try the demo</h3><p>Explore every screen with a made-up student first. One click on “Erase everything” in the Data menu clears it and brings you back here.</p><span class="go">Show me around →</span></button>' +
       '</div>';
     if (step === 'quick') h += quickForm();
@@ -93,6 +94,7 @@ UI.Welcome = (function () {
       else if (a === 'startQuick') startQuick();
       else if (a === 'startFull') startFull();
       else if (a === 'demo') startDemo();
+      else if (a === 'calc') { el.innerHTML = ''; UI.QuickCalc.mount(el, { standalone: true }); window.scrollTo(0, 0); }
       else if (a === 'load') loadFile();
     });
     el.addEventListener('keydown', function (e) { if (e.key === 'Enter' && step === 'quick' && e.target.tagName === 'INPUT') startQuick(); });

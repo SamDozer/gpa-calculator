@@ -263,5 +263,19 @@ window.I18N_AR = {
   /* chart labels */
   'Computed CGPA': 'المعدل المحسوب', 'Plan (projected)': 'الخطة (متوقعة)', 'Target': 'الهدف', 'Term GPA': 'معدل الترم', 'Earned': 'المنجز', 'Planned · new': 'مخطط · جديد', 'Planned · retake': 'مخطط · إعادة', 'Not planned': 'لسه ما اتخططش',
   'Now': 'دلوقتي', 'Conserv. #/#': 'متحفظ #/#', 'Realistic #/#': 'واقعي #/#', 'Optimistic #/#': 'متفائل #/#', 'Your plan': 'خطتك', 'Graduating CGPA': 'معدل التخرج', 'Unscheduled': 'من غير جدول', 'Runs': 'مرات',
-  'Demo student loaded.': 'اتحمّل الطالب التجريبي.'
+  'Demo student loaded.': 'اتحمّل الطالب التجريبي.',
+  /* quick calculator */
+  'Quick calc': 'حاسبة سريعة', 'Use my current CGPA & hours': 'استخدم معدلي وساعاتي الحالية', 'Just calculate': 'احسب على طول', 'No setup and no course names. Type your CGPA and finished hours, then this semester’s hours and expected scores, and see your new CGPA.': 'من غير إعداد ولا أسماء مواد. اكتب معدلك وساعاتك اللي خلصتها، وبعدين ساعات الترم ده والدرجات المتوقعة، وشوف معدلك الجديد.',
+  'Open the quick calculator →': 'افتح الحاسبة السريعة ←', '← Back': '→ رجوع', 'Quick GPA calculator': 'حاسبة المعدل السريعة',
+  'No course names, no transcript: just your current CGPA, the hours you have finished, and this semester’s hours and expected scores. You get this semester’s GPA and your new CGPA.': 'من غير أسماء مواد ولا كشف درجات: بس معدلك الحالي، والساعات اللي خلصتها، وساعات الترم ده والدرجات المتوقعة. هتطلعلك معدل الترم ومعدلك التراكمي الجديد.',
+  'Finished hours': 'الساعات اللي خلصتها', 'The hours counted in your CGPA. If you never failed a course this is simply your passed hours. A failed course still counts in this number.': 'الساعات المحسوبة في معدلك. لو عمرك ما سقطت يبقى هي ساعات نجاحك. المادة اللي سقطت فيها لسه بتتحسب في الرقم ده.',
+  'Target CGPA (optional)': 'المعدل المستهدف (اختياري)', 'e.g. #.#': 'مثلاً #.#', 'This semester': 'الترم ده', 'Number of courses': 'عدد المواد', 'Total hours': 'إجمالي الساعات', 'Expected average %': 'المتوسط المتوقع %', 'Fill the courses': 'املا المواد',
+  'hours': 'الساعات', 'points': 'النقاط', 'retake?': 'إعادة؟', '+ Add a course': '+ ضيف مادة', 'Hours': 'الساعات',
+  'Failed or missed this course before; it then counts one extra time in your CGPA': 'سقطت أو غبت في المادة دي قبل كده؛ ساعتها بتتحسب مرة زيادة في معدلك', 'Retake': 'إعادة',
+  'Enter your current CGPA (# to #).': 'اكتب معدلك الحالي (من # لـ #).', 'Enter the hours you have finished (counted in your CGPA).': 'اكتب الساعات اللي خلصتها (المحسوبة في معدلك).', 'Add at least one course with its hours.': 'ضيف مادة واحدة على الأقل بساعاتها.', 'Scores must be between # and #.': 'الدرجات لازم تبقى بين # و#.',
+  'New CGPA': 'المعدل الجديد', '# hours · ≈ #%': '# ساعة · ≈ #%', '+# from # · # hours': '+# من # · # ساعة', '−# from # · # hours': '−# من # · # ساعة', 'German (est.) #': 'الألماني (تقدير) #',
+  'Excellent': 'ممتاز', 'Very Good': 'جيد جداً', 'Good': 'جيد', 'Pass': 'مقبول', 'Below pass': 'أقل من النجاح',
+  'You reach # just by passing these courses.': 'هتوصل لـ # بمجرد ما تنجح في المواد دي.', 'To reach # this semester you need about #% on average in these courses.': 'علشان توصل لـ # الترم ده محتاج حوالي #% كمتوسط في المواد دي.', '# is out of reach this semester: even #% everywhere gives #.': '# بعيد المنال الترم ده: حتى #% في كل حاجة بيدّي #.',
+  'A retake ticked here is assumed to have been failed once before, so its earlier attempt is already inside your finished hours.': 'الإعادة اللي بتعلّم عليها هنا بنفترض إنها اتسقطت مرة قبل كده، فمحاولتها القديمة متحسوبة بالفعل في ساعاتك.',
+  'What if I average…': 'لو جبت متوسط…', 'The same courses, every one at the same score.': 'نفس المواد، كلها بنفس الدرجة.', 'average': 'المتوسط', 'semester GPA': 'معدل الترم', 'new CGPA': 'المعدل الجديد', 'change': 'التغيير', 'class': 'التقدير'
 };

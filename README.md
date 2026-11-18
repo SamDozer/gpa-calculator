@@ -22,6 +22,8 @@ A free, private GPA calculator and semester planner for **credit-hour programmes
 | **Quick start** | You know your current CGPA and hours and don’t want to type old courses. Enter them, add this or next semester’s courses, done. Old courses are optional and are counted on top. |
 | **Full transcript** | You want the exact CGPA, term-by-term charts, repeat penalties and a degree map. Paste your courses straight from Excel or Google Sheets (CSV/TSV/JSON). |
 
+| **Just calculate** | You only want a number: type your CGPA and finished hours, then this semester’s hours and expected scores (no course names). You get the semester GPA, the new CGPA, each course’s effect and a what-if table. Also available as the *Quick calc* tab. |
+
 There is also a **demo** with a made-up student so you can click around first. The whole interface is also available in **Egyptian Arabic** (right-to-left): press the *عربي* button in the header (it follows your browser language on first visit).
 
 ## Screens
